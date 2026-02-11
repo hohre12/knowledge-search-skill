@@ -508,6 +508,107 @@ fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📝 Updating TOOLS.md..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Update TOOLS.md for each installed target
+update_tools_md() {
+    local workspace_dir=$1
+    local tools_md="$workspace_dir/TOOLS.md"
+    
+    # Check if TOOLS.md exists
+    if [ ! -f "$tools_md" ]; then
+        echo "⚠️  TOOLS.md not found at $tools_md"
+        return
+    fi
+    
+    # Check if Knowledge Search section already exists
+    if grep -q "## 🔍 Knowledge Search" "$tools_md"; then
+        echo "⚠️  Knowledge Search section already exists in TOOLS.md"
+        return
+    fi
+    
+    # Create backup
+    cp "$tools_md" "${tools_md}.backup"
+    
+    # Prepend Knowledge Search section
+    cat > "${tools_md}.tmp" << 'EOFTOOLS'
+# TOOLS.md - Local Notes
+
+## 🔍 Knowledge Search (최우선 사용!)
+
+**재원님의 개인적인 질문 → 무조건 `ks search` 먼저 실행!**
+
+### 사용 대상 (이런 질문이면 무조건 실행)
+
+✅ **개인적인 과거 기억:**
+- "내가 언제...", "나는 왜...", "내 생각은...", "내가 작성한..."
+- "지난번에 내가...", "예전에 내가...", "과거에 내가..."
+
+✅ **프로젝트/작업 관련:**
+- 프로젝트 상태, 진행 상황, 결정 사항, 설계 문서
+- "SignalHub이 뭐야?", "Trading Bot 현황은?", "프로젝트 목록"
+
+✅ **문서/기록 검색:**
+- 회의록, 메모, 일지, 분석 자료, 가이드, TODO
+- "~에 대한 문서", "~관련 메모", "~회의에서 뭐라고..."
+
+✅ **맥락/배경 정보:**
+- "왜 그렇게 결정했지?", "어떤 이유로?", "배경이 뭐야?"
+- "현재 상태가...", "어디까지 했지?", "다음 단계는?"
+
+❌ **사용하지 않는 경우:**
+- 실시간 정보 (날씨, 뉴스, 주가) → web_search
+- 코드 실행/파일 작업 → exec/read/write
+- 최근 며칠 기록만 필요 → memory_search (더 빠름)
+
+### 명령어
+
+```bash
+ks search "검색어"                           # 기본 (5개)
+ks search "검색어" --limit 10                # 더 많이
+ks search "검색어" --author 재원              # 작성자 필터
+ks search "검색어" --source obsidian         # 소스 필터
+ks search "검색어" --min-similarity 30       # 넓은 범위
+ks status                                    # DB 상태
+```
+
+### 실행 방법
+
+1. 질문 받음 → 개인적인/과거/문서 관련인가? → YES → `ks search` 자동 실행
+2. 검색 결과 → 자연스럽게 답변 (출처 간단히 언급 가능)
+3. **절대 하지 말 것:** "스킬을 사용합니다", "검색하겠습니다" 같은 안내
+
+**키포인트:** 재원님에 대한 질문 = 거의 대부분 ks search 대상! 🎯
+
+---
+
+EOFTOOLS
+    
+    # Append original content (skip first line if it's "# TOOLS.md")
+    tail -n +2 "$tools_md" >> "${tools_md}.tmp"
+    
+    # Replace original
+    mv "${tools_md}.tmp" "$tools_md"
+    
+    echo "✅ TOOLS.md updated at $tools_md"
+}
+
+# Update TOOLS.md for each target
+if [ $INSTALL_OPENCLAW -eq 1 ]; then
+    update_tools_md "$HOME/.openclaw/workspace"
+fi
+
+if [ $INSTALL_OPENCODE -eq 1 ]; then
+    update_tools_md "$HOME/.config/opencode/workspace"
+fi
+
+if [ $INSTALL_CLAUDE -eq 1 ]; then
+    update_tools_md "$HOME/.claude/workspace"
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🎉 Installation Complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
