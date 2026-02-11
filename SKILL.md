@@ -1,6 +1,6 @@
 ---
 name: knowledge-search
-description: Search indexed knowledge base using natural language. MANDATORY: Use when user asks about past work, projects, documents, meetings, decisions, or any historical context - run `ks search --format json` FIRST before answering. Always use --format json to get full document content.
+description: Search indexed knowledge base using natural language. MANDATORY: Use when user asks about past work, projects, documents, meetings, decisions, or any historical context - run `ks search --format json` FIRST before answering. Always use --format json to get full document content in original language.
 homepage: https://github.com/hohre12/knowledge-search-skill
 metadata:
   {
@@ -47,10 +47,10 @@ Search your indexed knowledge base using natural language. Powered by vector emb
 1. **Always use `--format json`** to get full document content (standard RAG)
 2. Run `ks search "<keywords>" --format json` silently
 3. Parse JSON response:
-   - `results[].text_original` - Original language (Korean for Apple Notes) - **PREFER THIS**
-   - `results[].text` - English translation (for search only)
-4. Use `text_original` as context when available (preserves original language)
-5. Present answer naturally based on original content
+   - `results[].text` - **Full document content in ORIGINAL language** (Korean/English auto-selected)
+   - `results[].text_en` - English translation (if needed)
+4. Use `text` field directly as context (already in original language)
+5. Present answer naturally in the same language as the source content
 
 ## Quick commands
 
@@ -111,8 +111,8 @@ Full setup guide: https://github.com/hohre12/knowledge-search-skill
 ks search "query" --format json
 ```
 - Returns full document content (not preview)
-- `text_original`: Original language (prefer this for answers)
-- `text`: English translation (used for search matching)
+- `text`: **Original language content** (Korean/English auto-selected)
+- `text_en`: English translation (if original is non-English)
 - Standard RAG pattern: search → get full text → answer
 - No need to read files separately
 

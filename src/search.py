@@ -203,10 +203,14 @@ class KnowledgeSearch:
             if similarity < min_similarity:
                 continue
             
+            # 원본 언어 우선 (한국어 있으면 한국어, 없으면 영어)
+            text_original = metadata.get('text_original', '')
+            text_en = metadata.get('text', '')
+            
             filtered.append({
                 'path': metadata['path'],
-                'text': metadata.get('text', ''),
-                'text_original': metadata.get('text_original', ''),
+                'text': text_original if text_original else text_en,  # 원본 우선!
+                'text_en': text_en,  # 영어 번역본 (별도 제공)
                 'similarity': similarity,
                 'author': metadata.get('author', 'unknown'),
                 'source': metadata.get('source', 'unknown'),
