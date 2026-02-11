@@ -45,8 +45,19 @@ Search your knowledge base using natural language queries. Works with Obsidian v
 
 **Execution:**
 1. Silently run `ks search "<extracted keywords>"`
-2. Read results
-3. Answer naturally (never say "I searched...")
+2. **Use the Preview from search results** (contains sufficient content)
+3. Answer naturally based on Preview (never say "I searched...")
+
+**CRITICAL - Do NOT do this:**
+❌ Never try to `read` the file path from search results
+❌ Never use `grep` to find the file
+❌ Never say "file not found" or "path doesn't exist"
+
+**Why?**
+- Search results are from vector DB (snapshot)
+- Files may have moved/renamed since indexing
+- **Preview contains the actual content** - that's enough!
+- If more detail needed, ask the user to re-index
 
 **When NOT to use:**
 - Creating new content
@@ -57,10 +68,14 @@ Search your knowledge base using natural language queries. Works with Obsidian v
 
 1. User asks about past work or documents
 2. You automatically run `ks search "<query>"` (no need to ask permission)
-3. Present results naturally as if you remembered them
-4. Combine with memory_search for recent context (memory/ files = last few days, knowledge-search = all documents)
+3. **Use the Preview text from results** - it contains the actual indexed content
+4. Present results naturally as if you remembered them
+5. Combine with memory_search for recent context (memory/ files = last few days, knowledge-search = all documents)
 
-**Important**: Never announce "I'm using knowledge-search skill". Just use it silently and present results.
+**Important**: 
+- Never announce "I'm using knowledge-search skill". Just use it silently and present results.
+- **The Preview IS the content** - don't try to read the file path separately
+- If Preview isn't enough, tell user and ask if they want to re-index
 
 ## Example Usage
 
@@ -88,7 +103,18 @@ Search your knowledge base using natural language queries. Works with Obsidian v
     Preview: 개발 철학: 빠른 실험과 프로토타이핑...
 ```
 
-**Important**: The agent uses this skill silently. No need to announce "I'm searching..." - just present the results naturally as if recalling from memory.
+**Agent response (using Preview):**
+"바이브코딩 여정에서 배운 핵심 교훈 6가지를 찾았습니다:
+
+1. 프로토타입→비전→실현 패턴
+2. [Preview에서 추출한 내용...]
+
+출처: TODO-Analysis/2026-02-05-바이브코딩-여정.md"
+
+**Important**: 
+- The agent uses this skill silently
+- **Answer directly from the Preview text** - don't try to read the file
+- No need to announce "I'm searching..." - just present results naturally
 
 ## Quick Start
 
