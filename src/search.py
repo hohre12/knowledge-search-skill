@@ -206,6 +206,7 @@ class KnowledgeSearch:
             filtered.append({
                 'path': metadata['path'],
                 'text': metadata.get('text', ''),
+                'text_original': metadata.get('text_original', ''),
                 'similarity': similarity,
                 'author': metadata.get('author', 'unknown'),
                 'source': metadata.get('source', 'unknown'),

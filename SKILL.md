@@ -46,9 +46,11 @@ Search your indexed knowledge base using natural language. Powered by vector emb
 **Usage (CRITICAL for AI):**
 1. **Always use `--format json`** to get full document content (standard RAG)
 2. Run `ks search "<keywords>" --format json` silently
-3. Parse JSON response: `results[].text` contains full document text
-4. Use full text as context (no need to read files)
-5. Present answer naturally based on full content
+3. Parse JSON response:
+   - `results[].text_original` - Original language (Korean for Apple Notes) - **PREFER THIS**
+   - `results[].text` - English translation (for search only)
+4. Use `text_original` as context when available (preserves original language)
+5. Present answer naturally based on original content
 
 ## Quick commands
 
@@ -109,6 +111,8 @@ Full setup guide: https://github.com/hohre12/knowledge-search-skill
 ks search "query" --format json
 ```
 - Returns full document content (not preview)
+- `text_original`: Original language (prefer this for answers)
+- `text`: English translation (used for search matching)
 - Standard RAG pattern: search → get full text → answer
 - No need to read files separately
 
