@@ -535,9 +535,11 @@ update_tools_md() {
     cat > "${tools_md}.tmp" << 'EOFTOOLS'
 # TOOLS.md - Local Notes
 
-## 🔍 Knowledge Search (자동 사용 필수!)
+## 🔍 Knowledge Search (최우선 사용!)
 
-**Read `~/.openclaw/skills/knowledge-search/SKILL.md` for full instructions.**
+재원님의 개인적인 질문 → 무조건 `ks search` 먼저 실행!
+
+Read `~/.openclaw/skills/knowledge-search/SKILL.md` for full instructions.
 
 ---
 
