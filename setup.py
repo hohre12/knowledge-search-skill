@@ -26,7 +26,7 @@ setup(
     description='Vector-based semantic search for your knowledge base (Obsidian, Apple Notes, etc.)',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    author='BaeJaeWon',
+    author='Jaewon Bae',
     author_email='hohre12@users.noreply.github.com',
     url='https://github.com/hohre12/knowledge-search-skill',
     packages=find_packages(),

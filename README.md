@@ -1,5 +1,7 @@
 # Knowledge Search Skill
 
+> **Author**: Jaewon Bae ([@hohre12](https://github.com/hohre12))
+
 AI-powered knowledge base search for OpenClaw/OpenCode/Claude Code CLI
 
 **Auto-triggered** - Just chat naturally, the AI agent automatically searches your knowledge base.
@@ -243,3 +245,13 @@ sudo vi /opt/homebrew/bin/ks
 - GitHub: https://github.com/hohre12/knowledge-search-skill
 - Supabase: https://supabase.com
 - OpenClaw: https://openclaw.ai
+
+## 👤 Author
+
+**Jaewon Bae**
+- GitHub: [@hohre12](https://github.com/hohre12)
+- Project: [knowledge-search-skill](https://github.com/hohre12/knowledge-search-skill)
+
+## 📄 License
+
+MIT License - Feel free to use and modify!

@@ -22,6 +22,10 @@
     "semantic-search",
     "openclaw"
   ],
-  "author": "BaeJaeWon",
-  "license": "MIT"
+  "author": "Jaewon Bae <hohre12@users.noreply.github.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/hohre12/knowledge-search-skill#readme",
+  "bugs": {
+    "url": "https://github.com/hohre12/knowledge-search-skill/issues"
+  }
 }
