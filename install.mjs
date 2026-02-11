@@ -6,10 +6,13 @@
  */
 
 import * as p from '@clack/prompts';
-import { execSync } from 'child_process';
+import { execSync, exec } from 'child_process';
+import { promisify } from 'util';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
+
+const execAsync = promisify(exec);
 
 const HOME = homedir();
 
@@ -156,7 +159,7 @@ async function main() {
       : join(HOME, '.claude/skills/knowledge-search');
     
     // Download files from GitHub
-    p.log.step('Downloading files from GitHub...');
+    const s1 = p.spinner();
     
     mkdirSync(primaryDir, { recursive: true });
     mkdirSync(join(primaryDir, 'src'), { recursive: true });
@@ -175,17 +178,19 @@ async function main() {
     
     const baseUrl = 'https://raw.githubusercontent.com/hohre12/knowledge-search-skill/main';
     
+    s1.start('Downloading files from GitHub...');
+    
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      p.log.info(`  [${i + 1}/${files.length}] ${file}`);
+      s1.message(`Downloading [${i + 1}/${files.length}] ${file}...`);
       try {
-        execSync(`curl -sSL ${baseUrl}/${file} -o ${join(primaryDir, file)}`, { stdio: 'pipe' });
+        await execAsync(`curl -sSL ${baseUrl}/${file} -o ${join(primaryDir, file)}`);
       } catch (err) {
-        p.log.warn(`  Failed: ${file}`);
+        // Continue on error
       }
     }
     
-    p.log.success('✓ Files downloaded');
+    s1.stop('✓ Files downloaded');
     
     // Create venv
     const s2 = p.spinner();
