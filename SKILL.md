@@ -92,7 +92,13 @@ ks status
 
 ## Installation
 
-One-line installer (interactive, multi-platform):
+**One-line installer with OpenClaw-style UI:**
+
+```bash
+npx github:hohre12/knowledge-search-skill
+```
+
+**Alternative (bash script):**
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/hohre12/knowledge-search-skill/main/install.sh | bash

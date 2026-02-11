@@ -28,17 +28,25 @@ OpenClaw/OpenCode/Claude Code CLI용 지식 검색 스킬
 - 🔒 **격리 보장**: 각자 다른 Supabase = 완전 격리
 - 💾 **Vector DB Only**: 임베딩 후 원본 파일 삭제 가능 (공간 절약/보안)
 
-## 🚀 설치 (30초)
+## 🚀 설치 (한 줄!)
 
+```bash
+npx github:hohre12/knowledge-search-skill
+```
+
+**OpenClaw 스타일 예쁜 UI로 설치가 진행됩니다!**
+
+설치 중 입력:
+1. 설치 위치 선택 (OpenClaw/OpenCode/Claude)
+2. Supabase URL & Key
+3. 임베딩 모델 선택 (OpenAI/Cohere)
+4. 번역 모델 선택 (Claude/GPT/없음)
+5. API 키 입력
+
+**또는 기존 방식:**
 ```bash
 curl -sSL https://raw.githubusercontent.com/hohre12/knowledge-search-skill/main/install.sh | bash
 ```
-
-설치 중 입력:
-1. Supabase URL & Key
-2. 임베딩 모델 선택 (OpenAI/Cohere)
-3. 번역 모델 선택 (Claude/GPT/없음)
-4. API 키 입력
 
 ## 📊 Supabase 설정
 
