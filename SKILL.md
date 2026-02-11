@@ -1,8 +1,11 @@
 ---
 name: knowledge-search
 description: Search and retrieve information from your knowledge base using natural language queries. Use this skill automatically when users ask about past work, decisions, project details, meeting notes, or any previously documented information. Supports filtering by source and author. Fast semantic search powered by vector embeddings.
+user-invocable: true
+disable-model-invocation: false
 license: MIT
 compatibility: openclaw, opencode, claude-code
+homepage: https://github.com/hohre12/knowledge-search-skill
 metadata: {"openclaw": {"emoji": "🔍", "requires": {"bins": ["python3", "ks"]}}}
 ---
 
