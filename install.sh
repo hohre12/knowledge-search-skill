@@ -8,6 +8,24 @@ BRANCH="main"
 echo "📦 Knowledge Search Skill Installation..."
 echo ""
 
+# Install gum if not available
+if ! command -v gum &> /dev/null; then
+    echo "📦 Installing gum for interactive UI..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        if command -v brew &> /dev/null; then
+            brew install gum
+        else
+            echo "⚠️  Homebrew not found. Falling back to text input."
+        fi
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # Linux
+        echo "⚠️  Please install gum manually for better experience."
+        echo "   https://github.com/charmbracelet/gum"
+    fi
+    echo ""
+fi
+
 # 1. Select installation targets
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📍 Select Installation Target(s)"
