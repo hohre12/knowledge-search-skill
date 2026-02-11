@@ -8,31 +8,64 @@ BRANCH="main"
 echo "📦 Knowledge Search Skill Installation..."
 echo ""
 
-# 1. Select installation targets
+# 1. Select installation targets using whiptail
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📍 Select Installation Target(s)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "  [1] OpenClaw (~/.openclaw/skills/)"
-echo "  [2] OpenCode (~/.config/opencode/skills/)"
-echo "  [3] Claude Code CLI (~/.claude/skills/)"
-echo ""
-echo "💡 Enter numbers (space separated, e.g., 1 2 3 for all)"
-echo ""
-read -p "Select: " TARGETS < /dev/tty
 
-INSTALL_OPENCLAW=0
-INSTALL_OPENCODE=0
-INSTALL_CLAUDE=0
-
-# Parse selections
-for target in $TARGETS; do
-    case $target in
-        1) INSTALL_OPENCLAW=1 ;;
-        2) INSTALL_OPENCODE=1 ;;
-        3) INSTALL_CLAUDE=1 ;;
-    esac
-done
+if command -v whiptail &> /dev/null; then
+    # Use whiptail for interactive checkbox
+    SELECTIONS=$(whiptail --title "Knowledge Search Installation" \
+        --checklist "Select installation targets (Space to select, Enter to confirm):" 15 70 3 \
+        "1" "OpenClaw (~/.openclaw/skills/)" ON \
+        "2" "OpenCode (~/.config/opencode/skills/)" OFF \
+        "3" "Claude Code CLI (~/.claude/skills/)" OFF \
+        3>&1 1>&2 2>&3)
+    
+    # Check if user cancelled
+    if [ $? -ne 0 ]; then
+        echo "❌ Installation cancelled"
+        exit 1
+    fi
+    
+    INSTALL_OPENCLAW=0
+    INSTALL_OPENCODE=0
+    INSTALL_CLAUDE=0
+    
+    # Parse selections (whiptail returns quoted numbers like "1" "2")
+    for target in $SELECTIONS; do
+        # Remove quotes
+        target=$(echo $target | tr -d '"')
+        case $target in
+            1) INSTALL_OPENCLAW=1 ;;
+            2) INSTALL_OPENCODE=1 ;;
+            3) INSTALL_CLAUDE=1 ;;
+        esac
+    done
+else
+    # Fallback to simple text input
+    echo "  [1] OpenClaw (~/.openclaw/skills/)"
+    echo "  [2] OpenCode (~/.config/opencode/skills/)"
+    echo "  [3] Claude Code CLI (~/.claude/skills/)"
+    echo ""
+    echo "💡 Enter numbers (space separated, e.g., 1 2 3 for all)"
+    echo ""
+    read -p "Select: " TARGETS < /dev/tty
+    
+    INSTALL_OPENCLAW=0
+    INSTALL_OPENCODE=0
+    INSTALL_CLAUDE=0
+    
+    # Parse selections
+    for target in $TARGETS; do
+        case $target in
+            1) INSTALL_OPENCLAW=1 ;;
+            2) INSTALL_OPENCODE=1 ;;
+            3) INSTALL_CLAUDE=1 ;;
+        esac
+    done
+fi
 
 # Validate at least one selection
 if [ $INSTALL_OPENCLAW -eq 0 ] && [ $INSTALL_OPENCODE -eq 0 ] && [ $INSTALL_CLAUDE -eq 0 ]; then
@@ -60,15 +93,25 @@ fi
 
 # Check existing installation
 if [ -d "$PRIMARY_DIR" ]; then
-    echo "⚠️  Already installed: $PRIMARY_DIR"
-    read -p "Remove and reinstall? (y/N): " -n 1 -r < /dev/tty
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        rm -rf "$PRIMARY_DIR"
-        echo "✅ Removed existing installation"
+    if command -v whiptail &> /dev/null; then
+        if whiptail --title "Already Installed" --yesno "Already installed at:\n$PRIMARY_DIR\n\nRemove and reinstall?" 10 70; then
+            rm -rf "$PRIMARY_DIR"
+            echo "✅ Removed existing installation"
+        else
+            echo "❌ Installation cancelled"
+            exit 1
+        fi
     else
-        echo "❌ Installation cancelled"
-        exit 1
+        echo "⚠️  Already installed: $PRIMARY_DIR"
+        read -p "Remove and reinstall? (y/N): " -n 1 -r < /dev/tty
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            rm -rf "$PRIMARY_DIR"
+            echo "✅ Removed existing installation"
+        else
+            echo "❌ Installation cancelled"
+            exit 1
+        fi
     fi
 fi
 
@@ -79,37 +122,63 @@ echo ""
 echo "💡 Same Supabase = Shared knowledge base"
 echo ""
 
-read -p "Supabase URL (e.g., https://xxx.supabase.co): " SUPABASE_URL < /dev/tty
-read -p "Supabase Key (anon key): " SUPABASE_KEY < /dev/tty
+if command -v whiptail &> /dev/null; then
+    SUPABASE_URL=$(whiptail --title "Supabase URL" --inputbox "Enter Supabase URL (e.g., https://xxx.supabase.co):" 10 70 3>&1 1>&2 2>&3)
+    SUPABASE_KEY=$(whiptail --title "Supabase Key" --inputbox "Enter Supabase anon key:" 10 70 3>&1 1>&2 2>&3)
+else
+    read -p "Supabase URL (e.g., https://xxx.supabase.co): " SUPABASE_URL < /dev/tty
+    read -p "Supabase Key (anon key): " SUPABASE_KEY < /dev/tty
+fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🤖 Embedding Model Selection"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "  [1] OpenAI text-embedding-3-small (Recommended, \$0.002/1M tokens)"
-echo "  [2] OpenAI text-embedding-3-large (\$0.013/1M tokens)"
-echo "  [3] Cohere embed-multilingual-v3.0 (Multilingual)"
-echo ""
-read -p "Select (1-3): " -n 1 -r EMBEDDING_CHOICE < /dev/tty
-echo ""
-echo ""
 
+if command -v whiptail &> /dev/null; then
+    EMBEDDING_CHOICE=$(whiptail --title "Embedding Model" --menu "Select embedding model:" 15 70 3 \
+        "1" "OpenAI text-embedding-3-small (Recommended, \$0.002/1M)" \
+        "2" "OpenAI text-embedding-3-large (\$0.013/1M)" \
+        "3" "Cohere embed-multilingual-v3.0 (Multilingual)" \
+        3>&1 1>&2 2>&3)
+else
+    echo "  [1] OpenAI text-embedding-3-small (Recommended, \$0.002/1M tokens)"
+    echo "  [2] OpenAI text-embedding-3-large (\$0.013/1M tokens)"
+    echo "  [3] Cohere embed-multilingual-v3.0 (Multilingual)"
+    echo ""
+    read -p "Select (1-3): " -n 1 -r EMBEDDING_CHOICE < /dev/tty
+    echo ""
+fi
+
+echo ""
 case $EMBEDDING_CHOICE in
     1)
         EMBEDDING_PROVIDER="openai"
         EMBEDDING_MODEL="text-embedding-3-small"
-        read -p "OpenAI API Key (sk-proj-...): " EMBEDDING_API_KEY < /dev/tty
+        if command -v whiptail &> /dev/null; then
+            EMBEDDING_API_KEY=$(whiptail --title "OpenAI API Key" --inputbox "Enter OpenAI API Key (sk-proj-...):" 10 70 3>&1 1>&2 2>&3)
+        else
+            read -p "OpenAI API Key (sk-proj-...): " EMBEDDING_API_KEY < /dev/tty
+        fi
         ;;
     2)
         EMBEDDING_PROVIDER="openai"
         EMBEDDING_MODEL="text-embedding-3-large"
-        read -p "OpenAI API Key (sk-proj-...): " EMBEDDING_API_KEY < /dev/tty
+        if command -v whiptail &> /dev/null; then
+            EMBEDDING_API_KEY=$(whiptail --title "OpenAI API Key" --inputbox "Enter OpenAI API Key (sk-proj-...):" 10 70 3>&1 1>&2 2>&3)
+        else
+            read -p "OpenAI API Key (sk-proj-...): " EMBEDDING_API_KEY < /dev/tty
+        fi
         ;;
     3)
         EMBEDDING_PROVIDER="cohere"
         EMBEDDING_MODEL="embed-multilingual-v3.0"
-        read -p "Cohere API Key: " EMBEDDING_API_KEY < /dev/tty
+        if command -v whiptail &> /dev/tty; then
+            EMBEDDING_API_KEY=$(whiptail --title "Cohere API Key" --inputbox "Enter Cohere API Key:" 10 70 3>&1 1>&2 2>&3)
+        else
+            read -p "Cohere API Key: " EMBEDDING_API_KEY < /dev/tty
+        fi
         ;;
     *)
         echo "❌ Invalid selection"
@@ -122,24 +191,41 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "🌍 Translation Model Selection"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "  [1] Claude Sonnet 4.5 (Recommended, Best quality)"
-echo "  [2] GPT-4o (OpenAI)"
-echo "  [3] No translation (English documents only)"
-echo ""
-read -p "Select (1-3): " -n 1 -r TRANSLATION_CHOICE < /dev/tty
-echo ""
-echo ""
 
+if command -v whiptail &> /dev/null; then
+    TRANSLATION_CHOICE=$(whiptail --title "Translation Model" --menu "Select translation model:" 15 70 3 \
+        "1" "Claude Sonnet 4.5 (Recommended, Best quality)" \
+        "2" "GPT-4o (OpenAI)" \
+        "3" "No translation (English documents only)" \
+        3>&1 1>&2 2>&3)
+else
+    echo "  [1] Claude Sonnet 4.5 (Recommended, Best quality)"
+    echo "  [2] GPT-4o (OpenAI)"
+    echo "  [3] No translation (English documents only)"
+    echo ""
+    read -p "Select (1-3): " -n 1 -r TRANSLATION_CHOICE < /dev/tty
+    echo ""
+fi
+
+echo ""
 case $TRANSLATION_CHOICE in
     1)
         TRANSLATION_PROVIDER="anthropic"
         TRANSLATION_MODEL="claude-sonnet-4-5-20250929"
-        read -p "Claude API Key (sk-ant-...): " TRANSLATION_API_KEY < /dev/tty
+        if command -v whiptail &> /dev/null; then
+            TRANSLATION_API_KEY=$(whiptail --title "Claude API Key" --inputbox "Enter Claude API Key (sk-ant-...):" 10 70 3>&1 1>&2 2>&3)
+        else
+            read -p "Claude API Key (sk-ant-...): " TRANSLATION_API_KEY < /dev/tty
+        fi
         ;;
     2)
         TRANSLATION_PROVIDER="openai"
         TRANSLATION_MODEL="gpt-4o"
-        read -p "OpenAI API Key (sk-proj-...): " TRANSLATION_API_KEY < /dev/tty
+        if command -v whiptail &> /dev/null; then
+            TRANSLATION_API_KEY=$(whiptail --title "OpenAI API Key" --inputbox "Enter OpenAI API Key (sk-proj-...):" 10 70 3>&1 1>&2 2>&3)
+        else
+            read -p "OpenAI API Key (sk-proj-...): " TRANSLATION_API_KEY < /dev/tty
+        fi
         ;;
     3)
         TRANSLATION_PROVIDER="none"
