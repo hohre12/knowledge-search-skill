@@ -1,0 +1,29 @@
+{
+  "name": "knowledge-search-skill",
+  "version": "1.0.0",
+  "description": "Vector-based semantic search for your knowledge base",
+  "type": "module",
+  "main": "install.mjs",
+  "bin": {
+    "knowledge-search-install": "./install.mjs"
+  },
+  "scripts": {
+    "install-skill": "node install.mjs"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hohre12/knowledge-search-skill.git"
+  },
+  "keywords": [
+    "knowledge-search",
+    "vector-search",
+    "rag",
+    "semantic-search",
+    "openclaw"
+  ],
+  "author": "BaeJaeWon",
+  "license": "MIT"
+}

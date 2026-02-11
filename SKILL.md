@@ -11,11 +11,12 @@ metadata:
         "install":
           [
             {
-              "id": "curl",
-              "kind": "curl",
-              "url": "https://raw.githubusercontent.com/hohre12/knowledge-search-skill/main/install.sh",
+              "id": "npx",
+              "kind": "node",
+              "package": "knowledge-search-skill",
+              "script": "install.mjs",
               "bins": ["ks"],
-              "label": "Install knowledge-search (interactive installer)",
+              "label": "Install knowledge-search (OpenClaw-style UI)",
             },
           ],
       },
