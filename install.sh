@@ -191,25 +191,31 @@ if command -v gum &> /dev/null; then
             EMBEDDING_MODEL="embed-multilingual-v3.0"
             EMBEDDING_API_KEY=$(gum input --placeholder "Enter Cohere API Key" < /dev/tty)
             ;;
+        *)
+            echo "❌ Invalid selection: '$EMBEDDING_SELECTION'"
+            exit 1
+            ;;
     esac
     
-elif command -v whiptail &> /dev/null; then
-    EMBEDDING_CHOICE=$(whiptail --title "Embedding Model" --menu "Select embedding model:" 15 70 3 \
-        "1" "OpenAI text-embedding-3-small (Recommended, \$0.002/1M)" \
-        "2" "OpenAI text-embedding-3-large (\$0.013/1M)" \
-        "3" "Cohere embed-multilingual-v3.0 (Multilingual)" \
-        3>&1 1>&2 2>&3)
 else
-    echo "  [1] OpenAI text-embedding-3-small (Recommended, \$0.002/1M tokens)"
-    echo "  [2] OpenAI text-embedding-3-large (\$0.013/1M tokens)"
-    echo "  [3] Cohere embed-multilingual-v3.0 (Multilingual)"
-    echo ""
-    read -p "Select (1-3): " -n 1 -r EMBEDDING_CHOICE < /dev/tty
-    echo ""
-fi
+    # Fallback to whiptail or text input
+    if command -v whiptail &> /dev/null; then
+        EMBEDDING_CHOICE=$(whiptail --title "Embedding Model" --menu "Select embedding model:" 15 70 3 \
+            "1" "OpenAI text-embedding-3-small (Recommended, \$0.002/1M)" \
+            "2" "OpenAI text-embedding-3-large (\$0.013/1M)" \
+            "3" "Cohere embed-multilingual-v3.0 (Multilingual)" \
+            3>&1 1>&2 2>&3)
+    else
+        echo "  [1] OpenAI text-embedding-3-small (Recommended, \$0.002/1M tokens)"
+        echo "  [2] OpenAI text-embedding-3-large (\$0.013/1M tokens)"
+        echo "  [3] Cohere embed-multilingual-v3.0 (Multilingual)"
+        echo ""
+        read -p "Select (1-3): " -n 1 -r EMBEDDING_CHOICE < /dev/tty
+        echo ""
+    fi
 
-echo ""
-case $EMBEDDING_CHOICE in
+    echo ""
+    case $EMBEDDING_CHOICE in
     1)
         EMBEDDING_PROVIDER="openai"
         EMBEDDING_MODEL="text-embedding-3-small"
@@ -241,7 +247,8 @@ case $EMBEDDING_CHOICE in
         echo "❌ Invalid selection"
         exit 1
         ;;
-esac
+    esac
+fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -260,37 +267,43 @@ if command -v gum &> /dev/null; then
         *"Claude"*)
             TRANSLATION_PROVIDER="anthropic"
             TRANSLATION_MODEL="claude-sonnet-4-5-20250929"
-            TRANSLATION_API_KEY=$(gum input --placeholder "Enter Claude API Key (sk-ant-...)") < /dev/tty
+            TRANSLATION_API_KEY=$(gum input --placeholder "Enter Claude API Key (sk-ant-...)" < /dev/tty)
             ;;
         *"GPT-4o"*)
             TRANSLATION_PROVIDER="openai"
             TRANSLATION_MODEL="gpt-4o"
-            TRANSLATION_API_KEY=$(gum input --placeholder "Enter OpenAI API Key (sk-proj-...)") < /dev/tty
+            TRANSLATION_API_KEY=$(gum input --placeholder "Enter OpenAI API Key (sk-proj-...)" < /dev/tty)
             ;;
         *"No translation"*)
             TRANSLATION_PROVIDER="none"
             TRANSLATION_MODEL=""
             TRANSLATION_API_KEY=""
             ;;
+        *)
+            echo "❌ Invalid selection: '$TRANSLATION_SELECTION'"
+            exit 1
+            ;;
     esac
     
-elif command -v whiptail &> /dev/null; then
-    TRANSLATION_CHOICE=$(whiptail --title "Translation Model" --menu "Select translation model:" 15 70 3 \
-        "1" "Claude Sonnet 4.5 (Recommended, Best quality)" \
-        "2" "GPT-4o (OpenAI)" \
-        "3" "No translation (English documents only)" \
-        3>&1 1>&2 2>&3)
 else
-    echo "  [1] Claude Sonnet 4.5 (Recommended, Best quality)"
-    echo "  [2] GPT-4o (OpenAI)"
-    echo "  [3] No translation (English documents only)"
-    echo ""
-    read -p "Select (1-3): " -n 1 -r TRANSLATION_CHOICE < /dev/tty
-    echo ""
-fi
+    # Fallback to whiptail or text input
+    if command -v whiptail &> /dev/null; then
+        TRANSLATION_CHOICE=$(whiptail --title "Translation Model" --menu "Select translation model:" 15 70 3 \
+            "1" "Claude Sonnet 4.5 (Recommended, Best quality)" \
+            "2" "GPT-4o (OpenAI)" \
+            "3" "No translation (English documents only)" \
+            3>&1 1>&2 2>&3)
+    else
+        echo "  [1] Claude Sonnet 4.5 (Recommended, Best quality)"
+        echo "  [2] GPT-4o (OpenAI)"
+        echo "  [3] No translation (English documents only)"
+        echo ""
+        read -p "Select (1-3): " -n 1 -r TRANSLATION_CHOICE < /dev/tty
+        echo ""
+    fi
 
-echo ""
-case $TRANSLATION_CHOICE in
+    echo ""
+    case $TRANSLATION_CHOICE in
     1)
         TRANSLATION_PROVIDER="anthropic"
         TRANSLATION_MODEL="claude-sonnet-4-5-20250929"
@@ -318,7 +331,8 @@ case $TRANSLATION_CHOICE in
         echo "❌ Invalid selection"
         exit 1
         ;;
-esac
+    esac
+fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
