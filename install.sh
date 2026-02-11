@@ -19,7 +19,8 @@ if command -v gum &> /dev/null; then
     SELECTIONS=$(gum choose --no-limit \
         "OpenClaw (~/.openclaw/skills/)" \
         "OpenCode (~/.config/opencode/skills/)" \
-        "Claude Code CLI (~/.claude/skills/)")
+        "Claude Code CLI (~/.claude/skills/)" \
+        < /dev/tty)
     
     INSTALL_OPENCLAW=0
     INSTALL_OPENCODE=0
@@ -114,7 +115,7 @@ fi
 # Check existing installation
 if [ -d "$PRIMARY_DIR" ]; then
     if command -v gum &> /dev/null; then
-        if gum confirm "Already installed at $PRIMARY_DIR. Remove and reinstall?"; then
+        if gum confirm "Already installed at $PRIMARY_DIR. Remove and reinstall?" < /dev/tty; then
             rm -rf "$PRIMARY_DIR"
             echo "✅ Removed existing installation"
         else
@@ -151,8 +152,8 @@ echo "💡 Same Supabase = Shared knowledge base"
 echo ""
 
 if command -v gum &> /dev/null; then
-    SUPABASE_URL=$(gum input --placeholder "Supabase URL (e.g., https://xxx.supabase.co)")
-    SUPABASE_KEY=$(gum input --placeholder "Supabase anon key" --password)
+    SUPABASE_URL=$(gum input --placeholder "Supabase URL (e.g., https://xxx.supabase.co)" < /dev/tty)
+    SUPABASE_KEY=$(gum input --placeholder "Supabase anon key" --password < /dev/tty)
 elif command -v whiptail &> /dev/null; then
     SUPABASE_URL=$(whiptail --title "Supabase URL" --inputbox "Enter Supabase URL (e.g., https://xxx.supabase.co):" 10 70 3>&1 1>&2 2>&3)
     SUPABASE_KEY=$(whiptail --title "Supabase Key" --inputbox "Enter Supabase anon key:" 10 70 3>&1 1>&2 2>&3)
@@ -171,23 +172,24 @@ if command -v gum &> /dev/null; then
     EMBEDDING_SELECTION=$(gum choose \
         "OpenAI text-embedding-3-small (Recommended, \$0.002/1M tokens)" \
         "OpenAI text-embedding-3-large (\$0.013/1M tokens)" \
-        "Cohere embed-multilingual-v3.0 (Multilingual)")
+        "Cohere embed-multilingual-v3.0 (Multilingual)" \
+        < /dev/tty)
     
     case "$EMBEDDING_SELECTION" in
         *"3-small"*)
             EMBEDDING_PROVIDER="openai"
             EMBEDDING_MODEL="text-embedding-3-small"
-            EMBEDDING_API_KEY=$(gum input --placeholder "Enter OpenAI API Key (sk-proj-...)")
+            EMBEDDING_API_KEY=$(gum input --placeholder "Enter OpenAI API Key (sk-proj-...)" < /dev/tty)
             ;;
         *"3-large"*)
             EMBEDDING_PROVIDER="openai"
             EMBEDDING_MODEL="text-embedding-3-large"
-            EMBEDDING_API_KEY=$(gum input --placeholder "Enter OpenAI API Key (sk-proj-...)")
+            EMBEDDING_API_KEY=$(gum input --placeholder "Enter OpenAI API Key (sk-proj-...)" < /dev/tty)
             ;;
         *"Cohere"*)
             EMBEDDING_PROVIDER="cohere"
             EMBEDDING_MODEL="embed-multilingual-v3.0"
-            EMBEDDING_API_KEY=$(gum input --placeholder "Enter Cohere API Key")
+            EMBEDDING_API_KEY=$(gum input --placeholder "Enter Cohere API Key" < /dev/tty)
             ;;
     esac
     
@@ -251,18 +253,19 @@ if command -v gum &> /dev/null; then
     TRANSLATION_SELECTION=$(gum choose \
         "Claude Sonnet 4.5 (Recommended, Best quality)" \
         "GPT-4o (OpenAI)" \
-        "No translation (English documents only)")
+        "No translation (English documents only)" \
+        < /dev/tty)
     
     case "$TRANSLATION_SELECTION" in
         *"Claude"*)
             TRANSLATION_PROVIDER="anthropic"
             TRANSLATION_MODEL="claude-sonnet-4-5-20250929"
-            TRANSLATION_API_KEY=$(gum input --placeholder "Enter Claude API Key (sk-ant-...)")
+            TRANSLATION_API_KEY=$(gum input --placeholder "Enter Claude API Key (sk-ant-...)") < /dev/tty
             ;;
         *"GPT-4o"*)
             TRANSLATION_PROVIDER="openai"
             TRANSLATION_MODEL="gpt-4o"
-            TRANSLATION_API_KEY=$(gum input --placeholder "Enter OpenAI API Key (sk-proj-...)")
+            TRANSLATION_API_KEY=$(gum input --placeholder "Enter OpenAI API Key (sk-proj-...)") < /dev/tty
             ;;
         *"No translation"*)
             TRANSLATION_PROVIDER="none"
