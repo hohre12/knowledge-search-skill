@@ -4,18 +4,69 @@ set -e
 # Knowledge Search Skill Installer
 REPO="hohre12/knowledge-search-skill"
 BRANCH="main"
-INSTALL_DIR="$HOME/.openclaw/skills/knowledge-search-skill"
 
 echo "📦 Knowledge Search Skill Installation..."
 echo ""
 
-# 1. Check existing installation
-if [ -d "$INSTALL_DIR" ]; then
-    echo "⚠️  Already installed: $INSTALL_DIR"
+# 1. Select installation targets
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📍 Select Installation Target(s)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "  1) OpenClaw (~/.openclaw/skills/)"
+echo "  2) OpenCode (~/.config/opencode/skills/)"
+echo "  3) Claude Code CLI (~/.claude/skills/)"
+echo ""
+echo "💡 You can select multiple (e.g., 1 2 3 or 1,2,3)"
+echo ""
+read -p "Select (space or comma separated): " TARGETS
+
+# Parse selections
+INSTALL_OPENCLAW=0
+INSTALL_OPENCODE=0
+INSTALL_CLAUDE=0
+
+# Remove commas and process
+TARGETS=$(echo "$TARGETS" | tr ',' ' ')
+
+for target in $TARGETS; do
+    case $target in
+        1) INSTALL_OPENCLAW=1 ;;
+        2) INSTALL_OPENCODE=1 ;;
+        3) INSTALL_CLAUDE=1 ;;
+    esac
+done
+
+# Validate at least one selection
+if [ $INSTALL_OPENCLAW -eq 0 ] && [ $INSTALL_OPENCODE -eq 0 ] && [ $INSTALL_CLAUDE -eq 0 ]; then
+    echo "❌ No target selected. Exiting."
+    exit 1
+fi
+
+# Show selected targets
+echo ""
+echo "Selected targets:"
+[ $INSTALL_OPENCLAW -eq 1 ] && echo "  ✅ OpenClaw"
+[ $INSTALL_OPENCODE -eq 1 ] && echo "  ✅ OpenCode"
+[ $INSTALL_CLAUDE -eq 1 ] && echo "  ✅ Claude Code CLI"
+echo ""
+
+# Primary install directory (full installation)
+if [ $INSTALL_OPENCLAW -eq 1 ]; then
+    PRIMARY_DIR="$HOME/.openclaw/skills/knowledge-search-skill"
+elif [ $INSTALL_OPENCODE -eq 1 ]; then
+    PRIMARY_DIR="$HOME/.config/opencode/skills/knowledge-search"
+else
+    PRIMARY_DIR="$HOME/.claude/skills/knowledge-search"
+fi
+
+# Check existing installation
+if [ -d "$PRIMARY_DIR" ]; then
+    echo "⚠️  Already installed: $PRIMARY_DIR"
     read -p "Remove and reinstall? (y/N): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        rm -rf "$INSTALL_DIR"
+        rm -rf "$PRIMARY_DIR"
         echo "✅ Removed existing installation"
     else
         echo "❌ Installation cancelled"
@@ -139,10 +190,10 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "🐍 Setting up Python environment..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# Move to install directory
-mkdir -p "$(dirname "$INSTALL_DIR")"
-mv "$TEMP_DIR" "$INSTALL_DIR"
-cd "$INSTALL_DIR"
+# Move to primary install directory
+mkdir -p "$(dirname "$PRIMARY_DIR")"
+mv "$TEMP_DIR" "$PRIMARY_DIR"
+cd "$PRIMARY_DIR"
 
 # Create Python virtual environment
 python3 -m venv venv
@@ -191,17 +242,51 @@ echo "✅ config.json created"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔗 Creating symlinks for other targets..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Create symlinks for other selected targets
+if [ $INSTALL_OPENCLAW -eq 0 ]; then
+    # If OpenClaw not primary, maybe create symlink
+    OPENCLAW_DIR="$HOME/.openclaw/skills/knowledge-search-skill"
+    if [ ! -e "$OPENCLAW_DIR" ]; then
+        mkdir -p "$(dirname "$OPENCLAW_DIR")"
+        ln -s "$PRIMARY_DIR" "$OPENCLAW_DIR"
+        echo "✅ OpenClaw symlink created"
+    fi
+fi
+
+if [ $INSTALL_OPENCODE -eq 1 ] && [ "$PRIMARY_DIR" != "$HOME/.config/opencode/skills/knowledge-search" ]; then
+    OPENCODE_DIR="$HOME/.config/opencode/skills/knowledge-search"
+    if [ ! -e "$OPENCODE_DIR" ]; then
+        mkdir -p "$(dirname "$OPENCODE_DIR")"
+        ln -s "$PRIMARY_DIR" "$OPENCODE_DIR"
+        echo "✅ OpenCode symlink created"
+    fi
+fi
+
+if [ $INSTALL_CLAUDE -eq 1 ] && [ "$PRIMARY_DIR" != "$HOME/.claude/skills/knowledge-search" ]; then
+    CLAUDE_DIR="$HOME/.claude/skills/knowledge-search"
+    if [ ! -e "$CLAUDE_DIR" ]; then
+        mkdir -p "$(dirname "$CLAUDE_DIR")"
+        ln -s "$PRIMARY_DIR" "$CLAUDE_DIR"
+        echo "✅ Claude Code CLI symlink created"
+    fi
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🔧 Registering CLI command..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Register ks CLI
 KS_BIN="/opt/homebrew/bin/ks"
 if [ ! -f "$KS_BIN" ]; then
-    cat > "$KS_BIN" << 'EOFCLI'
+    cat > "$KS_BIN" << EOFCLI
 #!/bin/bash
-cd "$HOME/.openclaw/skills/knowledge-search-skill"
+cd "$PRIMARY_DIR"
 source venv/bin/activate
-python src/cli.py "$@"
+python src/cli.py "\$@"
 EOFCLI
     chmod +x "$KS_BIN"
     echo "✅ ks command registered"
@@ -214,9 +299,14 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "🎉 Installation Complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "📁 Install location: $INSTALL_DIR"
+echo "📁 Primary install: $PRIMARY_DIR"
 echo ""
-echo "✨ Start using in OpenClaw/OpenCode/Claude Code CLI"
+echo "Installed to:"
+[ $INSTALL_OPENCLAW -eq 1 ] && echo "  ✅ OpenClaw"
+[ $INSTALL_OPENCODE -eq 1 ] && echo "  ✅ OpenCode"
+[ $INSTALL_CLAUDE -eq 1 ] && echo "  ✅ Claude Code CLI"
+echo ""
+echo "✨ Start using in your selected AI tools"
 echo "   The agent will automatically search your knowledge base."
 echo ""
 echo "💡 Additional options:"
