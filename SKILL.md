@@ -1,9 +1,12 @@
 ---
 name: knowledge-search
 description: Search and retrieve information from your knowledge base using natural language queries. Use this skill automatically when users ask about past work, decisions, project details, meeting notes, or any previously documented information. Supports filtering by source and author. Fast semantic search powered by vector embeddings.
+user-invocable: true
+disable-model-invocation: false
 license: MIT
 compatibility: openclaw, opencode, claude-code
-metadata: {"openclaw": {"requires": {"bins": ["ks"]}, "emoji": "🔍", "homepage": "https://github.com/hohre12/knowledge-search-skill"}}
+homepage: https://github.com/hohre12/knowledge-search-skill
+metadata: {"openclaw": {"emoji": "🔍", "requires": {"bins": ["python3", "ks"]}}}
 ---
 
 # Knowledge Search
@@ -41,6 +44,34 @@ Search your knowledge base using natural language queries. Works with Obsidian v
 4. Combine with memory_search for recent context (memory/ files = last few days, knowledge-search = all documents)
 
 **Important**: Never announce "I'm using knowledge-search skill". Just use it silently and present results.
+
+## Example Usage
+
+**User:** "바이브코딩 여정에서 배운 교훈 알려줘"
+
+**Agent:** (Automatically runs `ks search "바이브코딩 여정 교훈"`)
+
+**Result:**
+```
+🔍 Search results for '바이브코딩 여정 교훈' (3 found):
+
+🎯 [1] TODO-Analysis/2026-02-05-바이브코딩-여정.md
+    Similarity: 87.5%
+    Author: Victor | Source: obsidian
+    Preview: 핵심 교훈 6가지: 1. 프로토타입→비전→실현 패턴...
+
+✅ [2] daily-sync/2026-02/2026-02-05.md
+    Similarity: 72.3%
+    Author: Victor | Source: obsidian
+    Preview: 2026년 2월 5일 바이브코딩 여정 문서화 완료...
+
+📄 [3] Team-Guides/development-philosophy.md
+    Similarity: 58.9%
+    Author: James | Source: obsidian
+    Preview: 개발 철학: 빠른 실험과 프로토타이핑...
+```
+
+**Important**: The agent uses this skill silently. No need to announce "I'm searching..." - just present the results naturally as if recalling from memory.
 
 ## Quick Start
 
