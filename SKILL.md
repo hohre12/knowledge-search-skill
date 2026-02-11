@@ -1,6 +1,6 @@
 ---
 name: knowledge-search
-description: Search and retrieve information from your knowledge base using natural language queries. Use this skill automatically when users ask about past work, decisions, project details, meeting notes, or any previously documented information. Supports filtering by source and author. Fast semantic search powered by vector embeddings.
+description: "MANDATORY FIRST STEP: Before answering ANY question about past work, projects, documents, meetings, decisions, or historical context, ALWAYS run `ks search \"<query>\"` first. This searches 454 indexed documents from Obsidian. Do NOT answer from memory alone. Use this skill automatically and silently - never announce you're using it."
 license: MIT
 compatibility: openclaw, opencode, claude-code
 metadata: {"openclaw": {"emoji": "🔍", "requires": {"bins": ["python3", "ks"]}}}
@@ -10,27 +10,33 @@ metadata: {"openclaw": {"emoji": "🔍", "requires": {"bins": ["python3", "ks"]}
 
 Search your knowledge base using natural language queries. Works with Obsidian vaults, notes, and documents.
 
-## Automatic Usage
+## ⚠️ MANDATORY AUTO-TRIGGER
 
-**This skill is invoked automatically** when the user asks about:
+**RULE: If user asks about ANYTHING from the past, run `ks search` FIRST.**
 
-- **Past work or projects**: "What did we work on last month?"
-- **Decisions and reasoning**: "Why did we choose this approach?"
-- **Project documentation**: "Show me the API documentation"
-- **Meeting notes**: "What was discussed in the planning meeting?"
-- **Task status**: "What's the current status of the project?"
-- **Historical context**: "When did we start this feature?"
-- **Team notes**: "What did John write about deployment?"
+**ALWAYS trigger on:**
+- ✅ "바이브 코딩 시작 계기가 뭐야?" → `ks search "바이브 코딩 시작 계기"`
+- ✅ "What did we work on last month?" → `ks search "work last month"`
+- ✅ "Why did we choose this approach?" → `ks search "why choose approach"`
+- ✅ "Show me the API documentation" → `ks search "API documentation"`
+- ✅ "What was discussed in the planning meeting?" → `ks search "planning meeting"`
+- ✅ "When did we start this feature?" → `ks search "start feature"`
+- ✅ "What did John write about deployment?" → `ks search "John deployment"`
 
-**Detection patterns** (user doesn't need to mention "search" or "knowledge"):
-- Questions about past ("What did...", "When did...", "Why did...")
-- Requests for context ("Show me...", "Find...", "Tell me about...")
-- Status inquiries ("What's the current...", "Where are we with...")
-- Document references ("Where is...", "What's in...")
+**Detection patterns:**
+- Any question word ("What", "When", "Why", "How", "Who", "Where")
+- Any past tense verb ("did", "was", "were", "decided", "wrote")
+- Any reference to documents, meetings, notes, projects
+- Korean questions about past context ("뭐야", "언제", "왜")
 
-**When NOT to use**:
-- Creating new notes (use other tools)
-- Real-time information (use web search)
+**Execution:**
+1. Silently run `ks search "<extracted keywords>"`
+2. Read results
+3. Answer naturally (never say "I searched...")
+
+**When NOT to use:**
+- Creating new content
+- Real-time info (use web_search)
 - Code execution (use exec)
 
 ## How It Works
