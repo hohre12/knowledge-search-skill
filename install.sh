@@ -19,7 +19,7 @@ echo "  3) Claude Code CLI (~/.claude/skills/)"
 echo ""
 echo "💡 You can select multiple (e.g., 1 2 3 or 1,2,3)"
 echo ""
-read -p "Select (space or comma separated): " TARGETS
+read -p "Select (space or comma separated): " TARGETS < /dev/tty
 
 # Parse selections
 INSTALL_OPENCLAW=0
@@ -63,7 +63,7 @@ fi
 # Check existing installation
 if [ -d "$PRIMARY_DIR" ]; then
     echo "⚠️  Already installed: $PRIMARY_DIR"
-    read -p "Remove and reinstall? (y/N): " -n 1 -r
+    read -p "Remove and reinstall? (y/N): " -n 1 -r < /dev/tty
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         rm -rf "$PRIMARY_DIR"
@@ -81,8 +81,8 @@ echo ""
 echo "💡 Same Supabase = Shared knowledge base"
 echo ""
 
-read -p "Supabase URL (e.g., https://xxx.supabase.co): " SUPABASE_URL
-read -p "Supabase Key (anon key): " SUPABASE_KEY
+read -p "Supabase URL (e.g., https://xxx.supabase.co): " SUPABASE_URL < /dev/tty
+read -p "Supabase Key (anon key): " SUPABASE_KEY < /dev/tty
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -93,7 +93,7 @@ echo "  1) OpenAI text-embedding-3-small (Recommended, \$0.002/1M tokens)"
 echo "  2) OpenAI text-embedding-3-large (\$0.013/1M tokens)"
 echo "  3) Cohere embed-multilingual-v3.0 (Multilingual)"
 echo ""
-read -p "Select (1-3): " -n 1 -r EMBEDDING_CHOICE
+read -p "Select (1-3): " -n 1 -r EMBEDDING_CHOICE < /dev/tty
 echo ""
 echo ""
 
@@ -101,17 +101,17 @@ case $EMBEDDING_CHOICE in
     1)
         EMBEDDING_PROVIDER="openai"
         EMBEDDING_MODEL="text-embedding-3-small"
-        read -p "OpenAI API Key (sk-proj-...): " EMBEDDING_API_KEY
+        read -p "OpenAI API Key (sk-proj-...): " EMBEDDING_API_KEY < /dev/tty
         ;;
     2)
         EMBEDDING_PROVIDER="openai"
         EMBEDDING_MODEL="text-embedding-3-large"
-        read -p "OpenAI API Key (sk-proj-...): " EMBEDDING_API_KEY
+        read -p "OpenAI API Key (sk-proj-...): " EMBEDDING_API_KEY < /dev/tty
         ;;
     3)
         EMBEDDING_PROVIDER="cohere"
         EMBEDDING_MODEL="embed-multilingual-v3.0"
-        read -p "Cohere API Key: " EMBEDDING_API_KEY
+        read -p "Cohere API Key: " EMBEDDING_API_KEY < /dev/tty
         ;;
     *)
         echo "❌ Invalid selection"
@@ -128,7 +128,7 @@ echo "  1) Claude Sonnet 4.5 (Recommended, Best quality)"
 echo "  2) GPT-4o (OpenAI)"
 echo "  3) No translation (English documents only)"
 echo ""
-read -p "Select (1-3): " -n 1 -r TRANSLATION_CHOICE
+read -p "Select (1-3): " -n 1 -r TRANSLATION_CHOICE < /dev/tty
 echo ""
 echo ""
 
@@ -136,12 +136,12 @@ case $TRANSLATION_CHOICE in
     1)
         TRANSLATION_PROVIDER="anthropic"
         TRANSLATION_MODEL="claude-sonnet-4-5-20250929"
-        read -p "Claude API Key (sk-ant-...): " TRANSLATION_API_KEY
+        read -p "Claude API Key (sk-ant-...): " TRANSLATION_API_KEY < /dev/tty
         ;;
     2)
         TRANSLATION_PROVIDER="openai"
         TRANSLATION_MODEL="gpt-4o"
-        read -p "OpenAI API Key (sk-proj-...): " TRANSLATION_API_KEY
+        read -p "OpenAI API Key (sk-proj-...): " TRANSLATION_API_KEY < /dev/tty
         ;;
     3)
         TRANSLATION_PROVIDER="none"
