@@ -145,8 +145,7 @@ async function main() {
   }
   
   // 5. Installation
-  const s = p.spinner();
-  s.start('Installing Knowledge Search...');
+  p.log.step('Starting installation...');
   
   try {
     // Determine primary directory
@@ -157,6 +156,9 @@ async function main() {
       : join(HOME, '.claude/skills/knowledge-search');
     
     // Download files from GitHub
+    const s1 = p.spinner();
+    s1.start('Downloading files from GitHub...');
+    
     mkdirSync(primaryDir, { recursive: true });
     mkdirSync(join(primaryDir, 'src'), { recursive: true });
     
@@ -176,7 +178,7 @@ async function main() {
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      s.message(`Downloading files... (${i + 1}/${files.length}) ${file}`);
+      s1.message(`Downloading ${file}... (${i + 1}/${files.length})`);
       try {
         execSync(`curl -sSL ${baseUrl}/${file} -o ${join(primaryDir, file)}`, { stdio: 'ignore' });
       } catch (err) {
@@ -184,21 +186,29 @@ async function main() {
       }
     }
     
+    s1.stop('✓ Files downloaded');
+    
     // Create venv
-    s.message('Creating Python virtual environment... (this may take 10-20 seconds)');
+    const s2 = p.spinner();
+    s2.start('Creating Python virtual environment...');
     const venvDir = join(HOME, '.local/share/knowledge-search-venv');
     mkdirSync(join(HOME, '.local/share'), { recursive: true });
-    execSync(`python3 -m venv ${venvDir}`, { stdio: 'ignore' });
+    execSync(`python3 -m venv ${venvDir}`, { stdio: 'pipe' });
+    s2.stop('✓ Python venv created');
     
     // Install dependencies
-    s.message('Upgrading pip...');
-    execSync(`${venvDir}/bin/pip install --quiet --upgrade pip`, { stdio: 'ignore' });
+    const s3 = p.spinner();
+    s3.start('Installing Python dependencies...');
+    s3.message('Upgrading pip...');
+    execSync(`${venvDir}/bin/pip install --upgrade pip`, { stdio: 'pipe' });
     
-    s.message('Installing Python dependencies... (openai, supabase, tiktoken, anthropic)');
-    execSync(`${venvDir}/bin/pip install --quiet -r ${primaryDir}/requirements.txt`, { stdio: 'ignore' });
+    s3.message('Installing packages (openai, supabase, tiktoken, anthropic, click)...');
+    // Show real-time output
+    execSync(`${venvDir}/bin/pip install -r ${primaryDir}/requirements.txt`, { stdio: 'inherit' });
+    s3.stop('✓ Dependencies installed');
     
     // Create config.json
-    s.message('Writing configuration (config.json)...');
+    p.log.step('Writing configuration...');
     const config = {
       supabase: {
         url: supabaseUrl,
@@ -222,29 +232,31 @@ async function main() {
     };
     
     writeFileSync(join(primaryDir, 'config.json'), JSON.stringify(config, null, 2));
+    p.log.success('✓ Configuration saved');
     
     // Register ks command
-    s.message('Registering ks command...');
+    p.log.step('Registering ks command...');
     const ksWrapper = `#!/bin/bash\nsource ${venvDir}/bin/activate\npython -m src.cli "$@"\n`;
     writeFileSync('/opt/homebrew/bin/ks', ksWrapper);
     execSync('chmod +x /opt/homebrew/bin/ks');
+    p.log.success('✓ ks command registered at /opt/homebrew/bin/ks');
     
     // Create symlinks
     if (targets.includes('opencode') && primaryDir !== join(HOME, '.config/opencode/skills/knowledge-search')) {
-      s.message('Creating OpenCode symlink...');
+      p.log.step('Creating OpenCode symlink...');
       const opencodeDir = join(HOME, '.config/opencode/skills/knowledge-search');
       mkdirSync(join(HOME, '.config/opencode/skills'), { recursive: true });
       execSync(`ln -s ${primaryDir} ${opencodeDir}`);
+      p.log.success('✓ OpenCode symlink created');
     }
     
     if (targets.includes('claude') && primaryDir !== join(HOME, '.claude/skills/knowledge-search')) {
-      s.message('Creating Claude CLI symlink...');
+      p.log.step('Creating Claude CLI symlink...');
       const claudeDir = join(HOME, '.claude/skills/knowledge-search');
       mkdirSync(join(HOME, '.claude/skills'), { recursive: true });
       execSync(`ln -s ${primaryDir} ${claudeDir}`);
+      p.log.success('✓ Claude CLI symlink created');
     }
-    
-    s.stop('Installation complete!');
     
     p.outro(`
 ✨ Knowledge Search is ready!
@@ -259,7 +271,7 @@ Next steps:
     `);
     
   } catch (error) {
-    s.stop('Installation failed');
+    p.log.error('Installation failed');
     p.cancel(`Error: ${error.message}`);
     process.exit(1);
   }
