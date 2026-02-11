@@ -37,8 +37,8 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "🤖 임베딩 모델 선택"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "  1) OpenAI text-embedding-3-small (권장, $0.002/1M tokens)"
-echo "  2) OpenAI text-embedding-3-large ($0.013/1M tokens)"
+echo "  1) OpenAI text-embedding-3-small (권장, \$0.002/1M tokens)"
+echo "  2) OpenAI text-embedding-3-large (\$0.013/1M tokens)"
 echo "  3) Cohere embed-multilingual-v3.0 (다국어)"
 echo ""
 read -p "선택 (1-3): " -n 1 -r EMBEDDING_CHOICE
