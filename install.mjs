@@ -199,12 +199,10 @@ async function main() {
     // Install dependencies
     const s3 = p.spinner();
     s3.start('Installing Python dependencies...');
-    s3.message('Upgrading pip...');
-    execSync(`${venvDir}/bin/pip install --upgrade pip`, { stdio: 'pipe' });
+    execSync(`${venvDir}/bin/pip install --quiet --upgrade pip`, { stdio: 'pipe' });
     
     s3.message('Installing packages (openai, supabase, tiktoken, anthropic, click)...');
-    // Show real-time output
-    execSync(`${venvDir}/bin/pip install -r ${primaryDir}/requirements.txt`, { stdio: 'inherit' });
+    execSync(`${venvDir}/bin/pip install --quiet -r ${primaryDir}/requirements.txt`, { stdio: 'pipe' });
     s3.stop('✓ Dependencies installed');
     
     // Create config.json
