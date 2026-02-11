@@ -197,13 +197,13 @@ async function main() {
     s2.stop('✓ Python venv created');
     
     // Install dependencies
-    const s3 = p.spinner();
-    s3.start('Installing Python dependencies...');
-    execSync(`${venvDir}/bin/pip install --quiet --upgrade pip`, { stdio: 'pipe' });
+    p.log.step('Upgrading pip...');
+    execSync(`${venvDir}/bin/pip install --quiet --upgrade pip`, { stdio: 'inherit' });
     
-    s3.message('Installing packages (openai, supabase, tiktoken, anthropic, click)...');
-    execSync(`${venvDir}/bin/pip install --quiet -r ${primaryDir}/requirements.txt`, { stdio: 'pipe' });
-    s3.stop('✓ Dependencies installed');
+    p.log.step('Installing Python packages (openai, supabase, tiktoken, anthropic, click)...');
+    // Show progress bar only (not detailed logs)
+    execSync(`${venvDir}/bin/pip install -q --progress-bar on -r ${primaryDir}/requirements.txt`, { stdio: 'inherit' });
+    p.log.success('✓ Dependencies installed');
     
     // Create config.json
     p.log.step('Writing configuration...');
