@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+# Knowledge Search Skill Installer
 REPO="hohre12/knowledge-search-skill"
 BRANCH="main"
 INSTALL_DIR="$HOME/.openclaw/skills/knowledge-search-skill"
