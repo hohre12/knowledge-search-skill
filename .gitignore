@@ -5,12 +5,8 @@ __pycache__/
 config.json
 .DS_Store
 
-# Test/utility scripts
-add_categories.py
-batch_ingest.py
-scan_*.py
-*_test.py
-*.backup
-
 # Internal docs
 ROADMAP.md
+
+# Archive (internal tools/scripts)
+archive/
