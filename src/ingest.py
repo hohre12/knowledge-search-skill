@@ -7,11 +7,12 @@ Obsidian 문서를 청크로 분할하여 Vector DB에 저장
 import json
 import openai
 from supabase import create_client
-from typing import List, Dict
+from typing import List, Dict, Optional
 from pathlib import Path
 import hashlib
 import tiktoken
 import re
+from datetime import datetime
 
 
 class KnowledgeIngest:
@@ -195,6 +196,60 @@ class KnowledgeIngest:
         
         return chunks
     
+    def parse_creation_date(self, content: str) -> Optional[str]:
+        """
+        파일 내용에서 생성일 파싱
+        
+        Args:
+            content: 파일 전체 내용
+        
+        Returns:
+            ISO 8601 형식의 날짜 문자열 또는 None
+        """
+        # Apple Notes 형식: "Created: 2016년 2월 26일 금요일 오전 2:42:56"
+        pattern = r'Created:\s*(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일.*?(\d{1,2}):(\d{2}):(\d{2})'
+        match = re.search(pattern, content)
+        
+        if match:
+            try:
+                year = int(match.group(1))
+                month = int(match.group(2))
+                day = int(match.group(3))
+                hour = int(match.group(4))
+                minute = int(match.group(5))
+                second = int(match.group(6))
+                
+                # 오전/오후 처리
+                if '오후' in content[match.start():match.end()+10] and hour < 12:
+                    hour += 12
+                elif '오전' in content[match.start():match.end()+10] and hour == 12:
+                    hour = 0
+                
+                dt = datetime(year, month, day, hour, minute, second)
+                return dt.isoformat()
+            except:
+                pass
+        
+        return None
+    
+    def parse_category(self, content: str) -> Optional[str]:
+        """
+        파일 내용에서 카테고리 파싱
+        
+        Args:
+            content: 파일 전체 내용
+        
+        Returns:
+            카테고리 문자열 또는 None
+        """
+        # 파일 첫 줄에서 "Category: [카테고리명]" 형식 파싱
+        lines = content.split('\n')
+        if lines and lines[0].strip().startswith("Category:"):
+            category = lines[0].replace("Category:", "").strip()
+            return category if category else None
+        
+        return None
+    
     def ingest_file(self, file_path: Path, source: str = "obsidian", author: str = "unknown"):
         """
         파일을 읽어서 임베딩
@@ -212,6 +267,12 @@ class KnowledgeIngest:
             print(f"   ⏭️  빈 파일: {file_path.name}")
             return
         
+        # 생성일 파싱
+        created_date = self.parse_creation_date(content)
+        
+        # 카테고리 파싱
+        category = self.parse_category(content)
+        
         # 메타데이터
         metadata = {
             "path": str(file_path.relative_to(Path.home())),
@@ -220,6 +281,16 @@ class KnowledgeIngest:
             "folder": file_path.parent.name,
             "file_hash": hashlib.md5(content.encode()).hexdigest()
         }
+        
+        # 생성일이 있으면 추가
+        if created_date:
+            metadata["created_date"] = created_date
+            # date 필드도 추가 (날짜만, YYYY-MM-DD)
+            metadata["date"] = created_date.split("T")[0]
+        
+        # 카테고리가 있으면 추가
+        if category:
+            metadata["category"] = category
         
         # 청킹
         chunks = self.chunk_text(content, metadata)

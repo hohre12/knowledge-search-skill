@@ -36,7 +36,8 @@ def cli():
 @click.option('--author', help='Filter by author')
 @click.option('--min-similarity', type=float, help='Minimum similarity % (default: from config)')
 @click.option('--benchmark', is_flag=True, help='Show search timing')
-def search(query, limit, source, author, min_similarity, benchmark):
+@click.option('--format', type=click.Choice(['text', 'json']), default='text', help='Output format: text (preview) or json (full content for AI)')
+def search(query, limit, source, author, min_similarity, benchmark, format):
     """
     Search your knowledge base
     
@@ -64,7 +65,19 @@ def search(query, limit, source, author, min_similarity, benchmark):
         )
         elapsed = time.time() - start
         
-        # 결과 출력
+        # JSON 출력 (AI용 - 전체 내용 포함)
+        if format == 'json':
+            import json
+            output = {
+                'query': query,
+                'count': len(results),
+                'results': results,
+                'elapsed_ms': round(elapsed * 1000, 1) if benchmark else None
+            }
+            click.echo(json.dumps(output, ensure_ascii=False, indent=2))
+            return
+        
+        # 텍스트 출력 (사람용 - Preview만)
         if not results:
             click.echo("❌ No results found.")
             click.echo(f"\n💡 Tips:")
@@ -87,11 +100,38 @@ def search(query, limit, source, author, min_similarity, benchmark):
             click.echo(f"    Similarity: {result['similarity']}%")
             click.echo(f"    Author: {result['author']} | Source: {result['source']}")
             
-            # 텍스트 미리보기 (150자)
+            # 텍스트 미리보기 (실제 내용만 표시)
             text = result.get('text', '')
             if text:
-                preview = text[:150] + '...' if len(text) > 150 else text
-                click.echo(f"    Preview: {preview}")
+                import re
+                
+                # HTML 태그 제거
+                clean_text = re.sub(r'<[^>]+>', '\n', text)
+                
+                # 메타데이터 패턴 제거
+                clean_text = re.sub(r'Category:.*?\n', '', clean_text)
+                clean_text = re.sub(r'Created:.*?\n', '', clean_text)
+                clean_text = re.sub(r'Modified:.*?\n', '', clean_text)
+                clean_text = re.sub(r'^#.*?\n', '', clean_text, flags=re.MULTILINE)
+                clean_text = re.sub(r'^---+\s*\n', '', clean_text, flags=re.MULTILINE)
+                
+                # 공백 정리
+                clean_text = re.sub(r'\n\s*\n+', '\n', clean_text)
+                clean_text = clean_text.strip()
+                
+                # 첫 3개 항목 추출 (실제 내용)
+                lines = [l.strip() for l in clean_text.split('\n') if l.strip()]
+                preview_items = lines[:5] if lines else []
+                
+                if preview_items:
+                    preview_text = ', '.join(preview_items)
+                    if len(preview_text) > 150:
+                        preview_text = preview_text[:150] + '...'
+                    click.echo(f"    Preview: {preview_text}")
+                else:
+                    # 폴백: 원본 텍스트에서 300자 이후 150자
+                    fallback = text[300:450] if len(text) > 300 else text[:150]
+                    click.echo(f"    Preview: {fallback}...")
             
             click.echo()
         

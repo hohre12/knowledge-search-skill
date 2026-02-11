@@ -35,6 +35,32 @@ if command -v gum &> /dev/null; then
         esac
     done <<< "$SELECTIONS"
     
+elif [[ "$OSTYPE" == "darwin"* ]] && command -v osascript &> /dev/null; then
+    # Use osascript for macOS native GUI (⌘+Click for multiple)
+    SELECTIONS=$(osascript -e 'choose from list {"OpenClaw (~/.openclaw/skills/)", "OpenCode (~/.config/opencode/skills/)", "Claude Code CLI (~/.claude/skills/)"} with prompt "Select installation targets (⌘+Click for multiple):" with multiple selections allowed default items {"OpenClaw (~/.openclaw/skills/)"}' 2>/dev/null || echo "false")
+    
+    # Check if user cancelled
+    if [ "$SELECTIONS" = "false" ]; then
+        echo "❌ Installation cancelled"
+        exit 1
+    fi
+    
+    INSTALL_OPENCLAW=0
+    INSTALL_OPENCODE=0
+    INSTALL_CLAUDE=0
+    
+    # Parse selections (osascript returns comma-separated list)
+    IFS=',' read -ra ITEMS <<< "$SELECTIONS"
+    for item in "${ITEMS[@]}"; do
+        # Trim whitespace
+        item=$(echo "$item" | xargs)
+        case "$item" in
+            *"OpenClaw"*) INSTALL_OPENCLAW=1 ;;
+            *"OpenCode"*) INSTALL_OPENCODE=1 ;;
+            *"Claude"*) INSTALL_CLAUDE=1 ;;
+        esac
+    done
+    
 elif command -v whiptail &> /dev/null; then
     # Use whiptail for interactive checkbox
     SELECTIONS=$(whiptail --title "Knowledge Search Installation" \
@@ -116,6 +142,15 @@ fi
 if [ -d "$PRIMARY_DIR" ]; then
     if command -v gum &> /dev/null; then
         if gum confirm "Already installed at $PRIMARY_DIR. Remove and reinstall?" < /dev/tty; then
+            rm -rf "$PRIMARY_DIR"
+            echo "✅ Removed existing installation"
+        else
+            echo "❌ Installation cancelled"
+            exit 1
+        fi
+    elif [[ "$OSTYPE" == "darwin"* ]] && command -v osascript &> /dev/null; then
+        RESPONSE=$(osascript -e "button returned of (display dialog \"Already installed at:\n$PRIMARY_DIR\n\nRemove and reinstall?\" buttons {\"Cancel\", \"Reinstall\"} default button \"Reinstall\")" 2>/dev/null || echo "Cancel")
+        if [ "$RESPONSE" = "Reinstall" ]; then
             rm -rf "$PRIMARY_DIR"
             echo "✅ Removed existing installation"
         else
