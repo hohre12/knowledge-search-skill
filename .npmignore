@@ -1,0 +1,26 @@
+# Development files
+*.pyc
+__pycache__/
+.pytest_cache/
+.coverage
+*.egg-info/
+
+# Config files
+config.json
+*.backup
+
+# Python-specific (npm doesn't need these for install script)
+venv/
+.venv/
+
+# Test/development scripts
+add_categories.py
+batch_ingest.py
+scan_*.py
+
+# Git
+.git/
+.github/
+
+# Keep only what's needed for installation
+# install.mjs, package.json, SKILL.md, README.md, requirements.txt

@@ -156,10 +156,33 @@ async function main() {
       ? join(HOME, '.config/opencode/skills/knowledge-search')
       : join(HOME, '.claude/skills/knowledge-search');
     
-    // Clone or download files
+    // Download files from GitHub
     s.message('Downloading files...');
     
-    execSync(`git clone https://github.com/hohre12/knowledge-search-skill.git ${primaryDir}`, { stdio: 'ignore' });
+    mkdirSync(primaryDir, { recursive: true });
+    mkdirSync(join(primaryDir, 'src'), { recursive: true });
+    
+    const files = [
+      'SKILL.md',
+      'README.md',
+      'requirements.txt',
+      'schema.sql',
+      'config.json.example',
+      'src/__init__.py',
+      'src/cli.py',
+      'src/search.py',
+      'src/ingest.py',
+    ];
+    
+    const baseUrl = 'https://raw.githubusercontent.com/hohre12/knowledge-search-skill/main';
+    
+    for (const file of files) {
+      try {
+        execSync(`curl -sSL ${baseUrl}/${file} -o ${join(primaryDir, file)}`, { stdio: 'ignore' });
+      } catch (err) {
+        // Continue on error
+      }
+    }
     
     // Create venv
     s.message('Creating Python virtual environment...');

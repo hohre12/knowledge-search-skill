@@ -4,9 +4,7 @@
   "description": "Vector-based semantic search for your knowledge base",
   "type": "module",
   "main": "install.mjs",
-  "bin": {
-    "knowledge-search-install": "./install.mjs"
-  },
+  "bin": "./install.mjs",
   "scripts": {
     "install-skill": "node install.mjs"
   },
