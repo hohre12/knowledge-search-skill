@@ -320,8 +320,7 @@ echo "🔗 Creating symlinks for other targets..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Create symlinks for other selected targets
-if [ $INSTALL_OPENCLAW -eq 0 ]; then
-    # If OpenClaw not primary, maybe create symlink
+if [ $INSTALL_OPENCLAW -eq 1 ] && [ "$PRIMARY_DIR" != "$HOME/.openclaw/skills/knowledge-search-skill" ]; then
     OPENCLAW_DIR="$HOME/.openclaw/skills/knowledge-search-skill"
     if [ ! -e "$OPENCLAW_DIR" ]; then
         mkdir -p "$(dirname "$OPENCLAW_DIR")"
