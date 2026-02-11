@@ -8,13 +8,33 @@ BRANCH="main"
 echo "📦 Knowledge Search Skill Installation..."
 echo ""
 
-# 1. Select installation targets using whiptail
+# 1. Select installation targets
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📍 Select Installation Target(s)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-if command -v whiptail &> /dev/null; then
+if command -v gum &> /dev/null; then
+    # Use gum for OpenClaw-style UI
+    SELECTIONS=$(gum choose --no-limit \
+        "OpenClaw (~/.openclaw/skills/)" \
+        "OpenCode (~/.config/opencode/skills/)" \
+        "Claude Code CLI (~/.claude/skills/)")
+    
+    INSTALL_OPENCLAW=0
+    INSTALL_OPENCODE=0
+    INSTALL_CLAUDE=0
+    
+    # Parse selections
+    while IFS= read -r line; do
+        case "$line" in
+            *"OpenClaw"*) INSTALL_OPENCLAW=1 ;;
+            *"OpenCode"*) INSTALL_OPENCODE=1 ;;
+            *"Claude"*) INSTALL_CLAUDE=1 ;;
+        esac
+    done <<< "$SELECTIONS"
+    
+elif command -v whiptail &> /dev/null; then
     # Use whiptail for interactive checkbox
     SELECTIONS=$(whiptail --title "Knowledge Search Installation" \
         --checklist "Select installation targets (Space to select, Enter to confirm):" 15 70 3 \
@@ -93,7 +113,15 @@ fi
 
 # Check existing installation
 if [ -d "$PRIMARY_DIR" ]; then
-    if command -v whiptail &> /dev/null; then
+    if command -v gum &> /dev/null; then
+        if gum confirm "Already installed at $PRIMARY_DIR. Remove and reinstall?"; then
+            rm -rf "$PRIMARY_DIR"
+            echo "✅ Removed existing installation"
+        else
+            echo "❌ Installation cancelled"
+            exit 1
+        fi
+    elif command -v whiptail &> /dev/null; then
         if whiptail --title "Already Installed" --yesno "Already installed at:\n$PRIMARY_DIR\n\nRemove and reinstall?" 10 70; then
             rm -rf "$PRIMARY_DIR"
             echo "✅ Removed existing installation"
@@ -122,7 +150,10 @@ echo ""
 echo "💡 Same Supabase = Shared knowledge base"
 echo ""
 
-if command -v whiptail &> /dev/null; then
+if command -v gum &> /dev/null; then
+    SUPABASE_URL=$(gum input --placeholder "Supabase URL (e.g., https://xxx.supabase.co)")
+    SUPABASE_KEY=$(gum input --placeholder "Supabase anon key" --password)
+elif command -v whiptail &> /dev/null; then
     SUPABASE_URL=$(whiptail --title "Supabase URL" --inputbox "Enter Supabase URL (e.g., https://xxx.supabase.co):" 10 70 3>&1 1>&2 2>&3)
     SUPABASE_KEY=$(whiptail --title "Supabase Key" --inputbox "Enter Supabase anon key:" 10 70 3>&1 1>&2 2>&3)
 else
@@ -136,7 +167,31 @@ echo "🤖 Embedding Model Selection"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-if command -v whiptail &> /dev/null; then
+if command -v gum &> /dev/null; then
+    EMBEDDING_SELECTION=$(gum choose \
+        "OpenAI text-embedding-3-small (Recommended, \$0.002/1M tokens)" \
+        "OpenAI text-embedding-3-large (\$0.013/1M tokens)" \
+        "Cohere embed-multilingual-v3.0 (Multilingual)")
+    
+    case "$EMBEDDING_SELECTION" in
+        *"3-small"*)
+            EMBEDDING_PROVIDER="openai"
+            EMBEDDING_MODEL="text-embedding-3-small"
+            EMBEDDING_API_KEY=$(gum input --placeholder "Enter OpenAI API Key (sk-proj-...)")
+            ;;
+        *"3-large"*)
+            EMBEDDING_PROVIDER="openai"
+            EMBEDDING_MODEL="text-embedding-3-large"
+            EMBEDDING_API_KEY=$(gum input --placeholder "Enter OpenAI API Key (sk-proj-...)")
+            ;;
+        *"Cohere"*)
+            EMBEDDING_PROVIDER="cohere"
+            EMBEDDING_MODEL="embed-multilingual-v3.0"
+            EMBEDDING_API_KEY=$(gum input --placeholder "Enter Cohere API Key")
+            ;;
+    esac
+    
+elif command -v whiptail &> /dev/null; then
     EMBEDDING_CHOICE=$(whiptail --title "Embedding Model" --menu "Select embedding model:" 15 70 3 \
         "1" "OpenAI text-embedding-3-small (Recommended, \$0.002/1M)" \
         "2" "OpenAI text-embedding-3-large (\$0.013/1M)" \
@@ -192,7 +247,31 @@ echo "🌍 Translation Model Selection"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-if command -v whiptail &> /dev/null; then
+if command -v gum &> /dev/null; then
+    TRANSLATION_SELECTION=$(gum choose \
+        "Claude Sonnet 4.5 (Recommended, Best quality)" \
+        "GPT-4o (OpenAI)" \
+        "No translation (English documents only)")
+    
+    case "$TRANSLATION_SELECTION" in
+        *"Claude"*)
+            TRANSLATION_PROVIDER="anthropic"
+            TRANSLATION_MODEL="claude-sonnet-4-5-20250929"
+            TRANSLATION_API_KEY=$(gum input --placeholder "Enter Claude API Key (sk-ant-...)")
+            ;;
+        *"GPT-4o"*)
+            TRANSLATION_PROVIDER="openai"
+            TRANSLATION_MODEL="gpt-4o"
+            TRANSLATION_API_KEY=$(gum input --placeholder "Enter OpenAI API Key (sk-proj-...)")
+            ;;
+        *"No translation"*)
+            TRANSLATION_PROVIDER="none"
+            TRANSLATION_MODEL=""
+            TRANSLATION_API_KEY=""
+            ;;
+    esac
+    
+elif command -v whiptail &> /dev/null; then
     TRANSLATION_CHOICE=$(whiptail --title "Translation Model" --menu "Select translation model:" 15 70 3 \
         "1" "Claude Sonnet 4.5 (Recommended, Best quality)" \
         "2" "GPT-4o (OpenAI)" \
