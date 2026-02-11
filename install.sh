@@ -260,6 +260,7 @@ if command -v gum &> /dev/null; then
     TRANSLATION_SELECTION=$(gum choose \
         "Claude Sonnet 4.5 (Recommended, Best quality)" \
         "GPT-4o (OpenAI)" \
+        "GPT-4o mini (OpenAI, Cheapest)" \
         "No translation (English documents only)" \
         < /dev/tty)
     
@@ -268,6 +269,11 @@ if command -v gum &> /dev/null; then
             TRANSLATION_PROVIDER="anthropic"
             TRANSLATION_MODEL="claude-sonnet-4-5-20250929"
             TRANSLATION_API_KEY=$(gum input --placeholder "Enter Claude API Key (sk-ant-...)" < /dev/tty)
+            ;;
+        *"GPT-4o mini"*)
+            TRANSLATION_PROVIDER="openai"
+            TRANSLATION_MODEL="gpt-4o-mini"
+            TRANSLATION_API_KEY=$(gum input --placeholder "Enter OpenAI API Key (sk-proj-...)" < /dev/tty)
             ;;
         *"GPT-4o"*)
             TRANSLATION_PROVIDER="openai"
@@ -288,17 +294,19 @@ if command -v gum &> /dev/null; then
 else
     # Fallback to whiptail or text input
     if command -v whiptail &> /dev/null; then
-        TRANSLATION_CHOICE=$(whiptail --title "Translation Model" --menu "Select translation model:" 15 70 3 \
+        TRANSLATION_CHOICE=$(whiptail --title "Translation Model" --menu "Select translation model:" 17 70 4 \
             "1" "Claude Sonnet 4.5 (Recommended, Best quality)" \
             "2" "GPT-4o (OpenAI)" \
-            "3" "No translation (English documents only)" \
+            "3" "GPT-4o mini (OpenAI, Cheapest)" \
+            "4" "No translation (English documents only)" \
             3>&1 1>&2 2>&3)
     else
         echo "  [1] Claude Sonnet 4.5 (Recommended, Best quality)"
         echo "  [2] GPT-4o (OpenAI)"
-        echo "  [3] No translation (English documents only)"
+        echo "  [3] GPT-4o mini (OpenAI, Cheapest)"
+        echo "  [4] No translation (English documents only)"
         echo ""
-        read -p "Select (1-3): " -n 1 -r TRANSLATION_CHOICE < /dev/tty
+        read -p "Select (1-4): " -n 1 -r TRANSLATION_CHOICE < /dev/tty
         echo ""
     fi
 
@@ -323,6 +331,15 @@ else
         fi
         ;;
     3)
+        TRANSLATION_PROVIDER="openai"
+        TRANSLATION_MODEL="gpt-4o-mini"
+        if command -v whiptail &> /dev/null; then
+            TRANSLATION_API_KEY=$(whiptail --title "OpenAI API Key" --inputbox "Enter OpenAI API Key (sk-proj-...):" 10 70 3>&1 1>&2 2>&3)
+        else
+            read -p "OpenAI API Key (sk-proj-...): " TRANSLATION_API_KEY < /dev/tty
+        fi
+        ;;
+    4)
         TRANSLATION_PROVIDER="none"
         TRANSLATION_MODEL=""
         TRANSLATION_API_KEY=""
@@ -358,12 +375,28 @@ FILES=(
 
 # Download files from GitHub
 BASE_URL="https://raw.githubusercontent.com/$REPO/$BRANCH"
+TOTAL=${#FILES[@]}
 
 mkdir -p src
-for file in "${FILES[@]}"; do
-    echo "  - $file"
-    curl -sSL "$BASE_URL/$file" -o "$file"
-done
+
+if command -v gum &> /dev/null; then
+    # Use gum spinner for interactive progress
+    gum spin --spinner dot --title "Downloading $TOTAL files..." -- sh -c '
+        for file in "SKILL.md" "README.md" "requirements.txt" "schema.sql" "setup.py" "src/__init__.py" "src/cli.py" "src/search.py" "src/ingest.py"; do
+            curl -sSL "'"$BASE_URL"'/$file" -o "$file"
+        done
+    '
+else
+    # Simple progress with dots
+    echo -n "  Downloading"
+    CURRENT=0
+    for file in "${FILES[@]}"; do
+        curl -sSL "$BASE_URL/$file" -o "$file"
+        CURRENT=$((CURRENT + 1))
+        echo -n "."
+    done
+    echo " done! ($TOTAL files)"
+fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
