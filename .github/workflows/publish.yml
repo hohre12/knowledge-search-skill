@@ -1,0 +1,53 @@
+name: Publish to GitHub Packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build package
+        run: python -m build
+
+      - name: Publish to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure PyPI repository for GitHub Packages
+          cat > ~/.pypirc <<EOF
+          [distutils]
+          index-servers =
+              github
+          
+          [github]
+          repository = https://upload.pypi.org/legacy/
+          username = __token__
+          password = ${{ secrets.GITHUB_TOKEN }}
+          EOF
+          
+          # Note: GitHub Packages doesn't support Python packages directly
+          # Use GitHub Releases instead for distribution
+          echo "⚠️  GitHub Packages doesn't support PyPI packages"
+          echo "📦 Package built successfully at dist/"
+          echo "💡 Use GitHub Releases for distribution"
+          ls -lh dist/
