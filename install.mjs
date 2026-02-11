@@ -222,6 +222,10 @@ async function main() {
         model: translationModelName,
         api_key: translationApiKey
       },
+      search: {
+        default_limit: 5,
+        min_similarity: 35.0
+      },
       sources: {
         obsidian: {
           path: "~/Library/Mobile Documents/iCloud~md~obsidian/Documents/AI-Workspace"
