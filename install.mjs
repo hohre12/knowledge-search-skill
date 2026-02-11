@@ -197,17 +197,19 @@ async function main() {
     s2.start('Creating Python virtual environment...');
     const venvDir = join(HOME, '.local/share/knowledge-search-venv');
     mkdirSync(join(HOME, '.local/share'), { recursive: true });
-    execSync(`python3 -m venv ${venvDir}`, { stdio: 'pipe' });
+    await execAsync(`python3 -m venv ${venvDir}`);
     s2.stop('✓ Python venv created');
     
     // Install dependencies
-    p.log.step('Upgrading pip...');
-    execSync(`${venvDir}/bin/pip install --quiet --upgrade pip`, { stdio: 'inherit' });
+    const s3 = p.spinner();
+    s3.start('Upgrading pip...');
+    await execAsync(`${venvDir}/bin/pip install --quiet --upgrade pip`);
+    s3.stop('✓ pip upgraded');
     
-    p.log.step('Installing Python packages (openai, supabase, tiktoken, anthropic, click)...');
-    // Show progress bar only (not detailed logs)
-    execSync(`${venvDir}/bin/pip install -q --progress-bar on -r ${primaryDir}/requirements.txt`, { stdio: 'inherit' });
-    p.log.success('✓ Dependencies installed');
+    const s4 = p.spinner();
+    s4.start('Installing Python packages (openai, supabase, tiktoken, anthropic, click)...');
+    await execAsync(`${venvDir}/bin/pip install --quiet -r ${primaryDir}/requirements.txt`);
+    s4.stop('✓ Dependencies installed');
     
     // Create config.json
     p.log.step('Writing configuration...');
