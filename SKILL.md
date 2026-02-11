@@ -1,6 +1,6 @@
 ---
 name: knowledge-search
-description: "MANDATORY FIRST STEP: Before answering ANY question about past work, projects, documents, meetings, decisions, or historical context, ALWAYS run `ks search \"<query>\"` first. This searches 454 indexed documents from Obsidian. Do NOT answer from memory alone. Use this skill automatically and silently - never announce you're using it."
+description: "MANDATORY FIRST STEP: Before answering ANY personal/past question, work history, project inquiry, or document search, ALWAYS run `ks search \"<query>\"` first. This searches 454 indexed documents. Triggers on: personal questions (내가/I + past tense), project names, document requests, past decisions. Use silently - never announce you're using it."
 license: MIT
 compatibility: openclaw, opencode, claude-code
 metadata: {"openclaw": {"emoji": "🔍", "requires": {"bins": ["python3", "ks"]}}}
@@ -15,19 +15,33 @@ Search your knowledge base using natural language queries. Works with Obsidian v
 **RULE: If user asks about ANYTHING from the past, run `ks search` FIRST.**
 
 **ALWAYS trigger on:**
-- ✅ "바이브 코딩 시작 계기가 뭐야?" → `ks search "바이브 코딩 시작 계기"`
-- ✅ "What did we work on last month?" → `ks search "work last month"`
-- ✅ "Why did we choose this approach?" → `ks search "why choose approach"`
-- ✅ "Show me the API documentation" → `ks search "API documentation"`
-- ✅ "What was discussed in the planning meeting?" → `ks search "planning meeting"`
-- ✅ "When did we start this feature?" → `ks search "start feature"`
-- ✅ "What did John write about deployment?" → `ks search "John deployment"`
+
+✅ **Personal/past questions:**
+- "내가 언제...", "나는 왜...", "내 생각은...", "내가 작성한..."
+- "지난번에 내가...", "예전에 내가...", "과거에 내가..."
+
+✅ **Project/work related:**
+- "바이브 코딩 시작 계기가 뭐야?" → `ks search "바이브 코딩 시작 계기"`
+- "What did we work on last month?" → `ks search "work last month"`
+- "SignalHub이 뭐야?" → `ks search "SignalHub"`
+- "Trading Bot 현황은?" → `ks search "Trading Bot 현황"`
+
+✅ **Documents/records:**
+- "Show me the API documentation" → `ks search "API documentation"`
+- "What was discussed in the planning meeting?" → `ks search "planning meeting"`
+- "~에 대한 문서", "~관련 메모", "~회의에서 뭐라고..."
+
+✅ **Context/background:**
+- "Why did we choose this approach?" → `ks search "why choose approach"`
+- "왜 그렇게 결정했지?", "어떤 이유로?", "배경이 뭐야?"
+- "현재 상태가...", "어디까지 했지?", "다음 단계는?"
 
 **Detection patterns:**
+- Personal pronouns with past tense ("I/내가" + "did/했다/작성한")
 - Any question word ("What", "When", "Why", "How", "Who", "Where")
 - Any past tense verb ("did", "was", "were", "decided", "wrote")
 - Any reference to documents, meetings, notes, projects
-- Korean questions about past context ("뭐야", "언제", "왜")
+- Korean questions about past/personal context ("뭐야", "언제", "왜", "내가")
 
 **Execution:**
 1. Silently run `ks search "<extracted keywords>"`
