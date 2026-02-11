@@ -1,7 +1,7 @@
 """
-Knowledge Search - 검색 로직
+Knowledge Search - Search Logic
 
-OpenClaw 에이전트들이 사용하는 핵심 검색 기능
+Core search functionality used by OpenClaw agents
 """
 
 import json
@@ -12,50 +12,50 @@ from pathlib import Path
 
 
 class KnowledgeSearch:
-    """Vector DB 기반 지식 검색"""
+    """Vector DB-based knowledge search"""
     
     def __init__(self, config_path: str = "config.json"):
         """
-        초기화
+        Initialize
         
         Args:
-            config_path: 설정 파일 경로
+            config_path: Configuration file path
         """
-        # 설정 로드
+        # Load configuration
         with open(config_path) as f:
             config = json.load(f)
         
         self.config = config
         
-        # Supabase 클라이언트
+        # Supabase client
         self.supabase = create_client(
             config["supabase"]["url"],
             config["supabase"]["key"]
         )
         
-        # Embedding 설정
+        # Embedding configuration
         self.embedding_provider = config["embedding"]["provider"]
         self.embedding_model = config["embedding"]["model"]
         self.embedding_api_key = config["embedding"]["api_key"]
         
-        # Translation 설정
+        # Translation configuration
         self.translation_provider = config["translation"]["provider"]
         self.translation_model = config["translation"].get("model", "")
         self.translation_api_key = config["translation"].get("api_key", "")
         
-        # 검색 설정
+        # Search configuration
         self.default_limit = config["search"]["default_limit"]
         self.min_similarity = config["search"]["min_similarity"]
     
     def translate_query(self, query: str) -> str:
         """
-        쿼리를 영어로 번역 (다국어 지원)
+        Translate query to English (multilingual support)
         
         Args:
-            query: 원본 쿼리
+            query: Original query
         
         Returns:
-            번역된 쿼리 (영어) 또는 원본
+            Translated query (English) or original
         """
         if self.translation_provider == "none":
             return query
@@ -152,72 +152,72 @@ class KnowledgeSearch:
         
         Args:
             query: 검색 쿼리
-            limit: 결과 개수
-            source: 소스 필터 (예: "obsidian", "github")
-            author: 작성자 필터
-            min_similarity: 최소 유사도 %
+            limit: Number of results
+            source: Source filter (e.g., "obsidian", "github")
+            author: Author filter
+            min_similarity: Minimum similarity %
         
         Returns:
-            검색 결과 리스트
+            List of search results
         """
-        # 기본값 설정
+        # Set defaults
         if limit is None:
             limit = self.default_limit
         if min_similarity is None:
             min_similarity = self.min_similarity
         
-        # 쿼리 번역
+        # Translate query
         translated_query = self.translate_query(query)
         if translated_query != query:
-            print(f"🔍 검색 중: '{query}' → EN: '{translated_query}'")
+            print(f"🔍 Searching: '{query}' → EN: '{translated_query}'")
         else:
-            print(f"🔍 검색 중: '{query}'")
+            print(f"🔍 Searching: '{query}'")
         
-        # 임베딩 생성
+        # Generate embedding
         query_embedding = self.get_embedding(translated_query)
         
-        # Supabase 검색
+        # Search Supabase
         results = self.supabase.rpc('search_embeddings', {
             'query_embedding': query_embedding,
             'match_threshold': min_similarity / 100.0,
             'match_count': limit * 3
         }).execute()
         
-        # 필터링 및 포맷
+        # Filter and format
         filtered = []
         for row in results.data:
             metadata = row['metadata']
             
-            # 소스 필터
+            # Source filter
             if source and metadata.get('source') != source:
                 continue
             
-            # 작성자 필터
+            # Author filter
             if author and metadata.get('author') != author:
                 continue
             
-            # 유사도 계산
+            # Calculate similarity
             similarity = round(row['similarity'] * 100, 1)
             
-            # 최소 유사도 필터
+            # Minimum similarity filter
             if similarity < min_similarity:
                 continue
             
-            # 원본 언어 우선 (한국어 있으면 한국어, 없으면 영어)
+            # Prefer original language (Korean if available, else English)
             text_original = metadata.get('text_original', '')
             text_en = metadata.get('text', '')
             
             filtered.append({
                 'path': metadata['path'],
-                'text': text_original if text_original else text_en,  # 원본 우선!
-                'text_en': text_en,  # 영어 번역본 (별도 제공)
+                'text': text_original if text_original else text_en,  # Original first!
+                'text_en': text_en,  # English translation (provided separately)
                 'similarity': similarity,
                 'author': metadata.get('author', 'unknown'),
                 'source': metadata.get('source', 'unknown'),
                 'date': metadata.get('date', '')
             })
         
-        # 유사도 순 정렬
+        # Sort by similarity
         filtered.sort(key=lambda x: x['similarity'], reverse=True)
         return filtered[:limit]
     

@@ -1,217 +1,244 @@
 # Knowledge Search Skill
 
-OpenClaw/OpenCode/Claude Code CLI용 지식 검색 스킬
+AI-powered knowledge base search for OpenClaw/OpenCode/Claude Code CLI
 
-**특정 트리거 없이** 자연어로 대화하면 AI 에이전트가 자동으로 지식 베이스를 검색합니다.
+**Auto-triggered** - Just chat naturally, the AI agent automatically searches your knowledge base.
 
-## 🎯 자동 트리거
+## 🎯 Auto-Trigger
 
-사용자가 "knowledge-search 스킬 사용해서..."라고 명시하지 않아도, 에이전트가 자동으로 판단하여 실행합니다:
+No need to explicitly say "use knowledge-search skill..." - the agent automatically decides when to use it:
 
 ```
-❌ 명시 필요 없음: "knowledge-search 스킬로 프로젝트 찾아줘"
-✅ 자연스럽게: "프로젝트 진행 상황 알려줘" → 자동 실행!
+❌ No need: "Use knowledge-search skill to find project"
+✅ Natural: "Tell me about project progress" → Auto-triggered!
 ```
 
-**자동 트리거 조건:**
-- 과거 작업/프로젝트 질문 ("What did...", "When did...")
-- 문서/노트 요청 ("Show me...", "Find...")
-- 결정사항/이유 질문 ("Why did...", "What was...")
-- 상태 확인 ("What's the current...")
+**Auto-trigger conditions:**
+- Past work/project questions ("What did...", "When did...")
+- Document/note requests ("Show me...", "Find...")
+- Decision/reasoning questions ("Why did...", "What was...")
+- Status checks ("What's the current...")
 
-## ✨ 특징
+## ✨ Features
 
-- 🔍 **자연어 검색**: "프로젝트 우선순위 알려줘" → 자동 검색
-- 🌍 **다국어 지원**: 한국어/영어 자동 번역 (선택 가능)
-- 🤖 **다중 모델**: OpenAI, Cohere 임베딩 / Claude, GPT 번역
-- 📦 **공유 가능**: 같은 Supabase = 같은 지식 베이스
-- 🔒 **격리 보장**: 각자 다른 Supabase = 완전 격리
-- 💾 **Vector DB Only**: 임베딩 후 원본 파일 삭제 가능 (공간 절약/보안)
+- 🔍 **Natural Language Search**: "Tell me project priorities" → Auto-search
+- 🌍 **Multilingual**: Auto-translate Korean/English (optional)
+- 🤖 **Multi-Model**: OpenAI, Cohere embeddings / Claude, GPT translation
+- 📦 **Shareable**: Same Supabase = Shared knowledge base
+- 🔒 **Isolated**: Different Supabase = Complete isolation
+- 💾 **Vector DB Only**: Delete original files after indexing (save space/security)
 
-## 🚀 설치 (한 줄!)
+## 🚀 Installation (One-liner!)
 
 ```bash
 npx github:hohre12/knowledge-search-skill
 ```
 
-**OpenClaw 스타일 예쁜 UI로 설치가 진행됩니다!**
+**Beautiful OpenClaw-style UI installation!**
 
-설치 중 입력:
-1. 설치 위치 선택 (OpenClaw/OpenCode/Claude)
-2. Supabase URL & Key
-3. 임베딩 모델 선택 (OpenAI/Cohere)
-4. 번역 모델 선택 (Claude/GPT/없음)
-5. API 키 입력
+During installation:
+1. Select installation target (OpenClaw/OpenCode/Claude)
+2. Enter Supabase URL & Key
+3. Choose embedding model (OpenAI/Cohere)
+4. Choose translation model (Claude/GPT/None)
+5. Enter API keys
 
-**또는 기존 방식:**
+**Or traditional method:**
 ```bash
 curl -sSL https://raw.githubusercontent.com/hohre12/knowledge-search-skill/main/install.sh | bash
 ```
 
-## 📊 Supabase 설정
+## 📊 Supabase Setup
 
-1. https://supabase.com 에서 프로젝트 생성
-2. SQL Editor에서 `schema.sql` 실행:
+1. Create project at https://supabase.com
+2. Run `schema.sql` in SQL Editor:
 
 ```bash
-cat ~/.openclaw/skills/knowledge-search-skill/schema.sql
+cat ~/.openclaw/skills/knowledge-search/schema.sql
 ```
 
-3. 테이블 생성 확인:
+3. Verify table creation:
 
 ```sql
 SELECT COUNT(*) FROM embeddings;
 ```
 
-## 💬 사용 방법
+## 💬 Usage
 
-### 자동 사용 (OpenClaw 권장)
+### Automatic Usage (OpenClaw Recommended)
 
-OpenClaw에서 자연스럽게 대화하면 자동으로 스킬이 실행됩니다:
+Just chat naturally in OpenClaw - the skill auto-triggers:
 
 ```
-사용자: "바이브코딩 여정에서 배운 교훈 알려줘"
-AI: (자동으로 ks search 실행) → 검색 결과 기반 답변
+User: "What did I learn from Vibe Coding journey?"
+AI: (auto-runs ks search) → Answers based on results
 
-사용자: "프로젝트 진행 상황 알려줘"
-AI: (자동으로 ks search 실행) → 답변
+User: "Tell me project progress"
+AI: (auto-runs ks search) → Answers
 
-사용자: "팀 가이드에 뭐가 있었지?"
-AI: (자동으로 ks search 실행) → 답변
+User: "What's in the team guide?"
+AI: (auto-runs ks search) → Answers
 ```
 
-**에이전트가 "검색 중입니다..."라고 말하지 않고 자연스럽게 결과를 제시합니다.**
+**The agent responds naturally without saying "Searching..."**
 
-### 수동 검색 (CLI)
+### Manual Search (CLI)
 
-직접 명령어로 검색:
+Direct command-line search:
 
 ```bash
-ks search "검색어"
-ks search "프로젝트 계획" --limit 10
-ks search "긴급 작업" --author John
+ks search "query"
+ks search "project plan" --limit 10
+ks search "urgent tasks" --author John
 ```
 
-## 🏗️ 아키텍처
+## 🏗️ Architecture
 
-**Vector DB = 유일한 소스**
+**Vector DB = Single Source of Truth**
 
 ```
-원본 문서 → 인덱싱 → Vector DB (임베딩 + 전체 텍스트)
-                           ↓
-                      원본 삭제 가능 ✅
-                           ↓
-                     검색 결과 = Preview (전체 내용)
+Original Docs → Indexing → Vector DB (embeddings + full text)
+                              ↓
+                        Delete originals OK ✅
+                              ↓
+                        Search results = Preview (full content)
 ```
 
-**중요:**
-- 검색 결과의 **Preview = 인덱싱된 전체 내용** (요약 아님)
-- 원본 파일은 인덱싱 후 삭제 가능 (공간 절약/보안 강화)
-- 파일 경로는 메타데이터일 뿐 (실제 파일 접근 불필요)
+**Important:**
+- Search result **Preview = Full indexed content** (not summary)
+- Original files can be deleted after indexing (save space/security)
+- File paths are just metadata (no actual file access needed)
 
-**장점:**
-- ✅ 디스크 공간 절약 (중복 제거)
-- ✅ 보안 강화 (민감 문서 삭제 후에도 검색 가능)
-- ✅ 빠른 검색 (파일 시스템 접근 불필요)
-- ✅ 공유 용이 (Vector DB만 공유)
+**Benefits:**
+- ✅ Disk space savings (deduplication)
+- ✅ Enhanced security (delete sensitive docs after indexing)
+- ✅ Fast search (no file system access)
+- ✅ Easy sharing (just share Vector DB)
 
-## 📝 나만의 문서 인덱싱 (선택)
+## 📝 Index Your Own Documents (Optional)
 
 ```bash
-# Obsidian 경로 설정
+# Configure Obsidian path
 vi ~/.openclaw/skills/knowledge-search/config.json
-# sources.obsidian.path 수정
+# Edit sources.obsidian.path
 
-# 폴더 인덱싱
+# Index folders
 ks ingest Notes
 ks ingest Projects
 ks ingest Projects/MyProject
 
-# 상태 확인
+# Check status
 ks status
 ```
 
-## 🔄 업데이트
+## 🔄 Update
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/hohre12/knowledge-search-skill/main/update.sh | bash
 ```
 
-## 📂 구조
+## 📂 Structure
 
 ```
 ~/.openclaw/skills/knowledge-search/
-├── SKILL.md              # 에이전트용 스킬 정의
-├── config.json           # 설정 (API 키, Supabase)
-├── requirements.txt      # Python 의존성
-├── schema.sql            # Supabase 스키마
+├── SKILL.md              # Skill definition for agents
+├── config.json           # Configuration (API keys, Supabase)
+├── requirements.txt      # Python dependencies
+├── schema.sql            # Supabase schema
 └── src/
-    ├── cli.py            # CLI 진입점
-    ├── search.py         # 검색 로직
-    └── ingest.py         # 임베딩 로직
+    ├── cli.py            # CLI entry point
+    ├── search.py         # Search logic
+    └── ingest.py         # Embedding logic
 ```
 
-## 🔧 OpenClaw 통합
+## 🔧 OpenClaw Integration
 
-이 스킬은 OpenClaw의 **Eager Loading** 메커니즘을 사용합니다:
+This skill uses OpenClaw's **Eager Loading** mechanism:
 
-**Frontmatter 설정:**
+**Frontmatter configuration:**
 ```yaml
 name: knowledge-search
-user-invocable: true              # 슬래시 커맨드 지원
-disable-model-invocation: false   # 에이전트 자동 실행 허용
+user-invocable: true              # Slash command support
+disable-model-invocation: false   # Allow agent auto-execution
 metadata:
   openclaw:
     requires:
-      bins: [python3, ks]         # 필수 명령어
+      bins: [python3, ks]         # Required binaries
 ```
 
-**동작 방식:**
-1. OpenClaw 시작 시 `requires.bins` 체크 (python3, ks)
-2. 통과하면 SKILL.md 전체 내용을 시스템 프롬프트에 주입
-3. 에이전트가 "Automatic Usage" 섹션을 읽고 자동 판단
-4. 트리거 패턴 일치 시 `ks search` 자동 실행
+**How it works:**
+1. OpenClaw checks `requires.bins` at startup (python3, ks)
+2. If passed, injects entire SKILL.md into system prompt
+3. Agent reads "Automatic Usage" section and decides
+4. When trigger pattern matches, auto-runs `ks search`
 
-**사용자 경험:**
-- ✅ 설치만 하면 끝 (추가 설정 불필요)
-- ✅ 자연스러운 대화로 검색
-- ✅ "스킬 사용해서..." 명시 불필요
+**User experience:**
+- ✅ Just install and done (no extra config)
+- ✅ Natural conversation for search
+- ✅ No need to say "use skill..."
 
-## 🤝 지식 공유
+## 🤝 Knowledge Sharing
 
-**같은 팀에서 지식 공유하려면?**
+**Want to share knowledge with your team?**
 
-1. 팀원 A가 Supabase 프로젝트 생성 + 문서 인덱싱
-2. 팀원 B, C가 설치할 때 같은 Supabase URL/Key 입력
-3. 모두 같은 지식 베이스 사용 ✅
+1. Team member A creates Supabase project + indexes documents
+2. Team members B, C enter same Supabase URL/Key during installation
+3. Everyone uses the same knowledge base ✅
 
-**개인용으로 완전 격리하려면?**
+**Want complete isolation for personal use?**
 
-각자 다른 Supabase 프로젝트 사용
+Each person uses different Supabase project
 
-## 💰 비용
+## 💰 Cost
 
-- **검색**: ~$0.00001/회
-- **인덱싱**: 문서 크기에 따라 $0.001~$0.01/파일
+- **Search**: ~$0.00001/query
+- **Indexing**: $0.001~$0.01/file depending on size
 
-예시: 500개 문서 인덱싱 = $0.50
+Example: Indexing 500 documents = $0.50
 
-## 🛠️ CLI 명령어
+## 🛠️ CLI Commands
 
 ```bash
-ks search <query>         # 검색
-ks ingest <folder>        # 폴더 인덱싱
-ks status                 # 상태 확인
-ks --help                 # 도움말
+ks search <query>         # Search
+ks ingest <folder>        # Index folder
+ks status                 # Check status
+ks --help                 # Help
 ```
 
-## 📚 지원 플랫폼
+## 📚 Supported Platforms
 
-- ✅ OpenClaw (권장)
+- ✅ OpenClaw (recommended)
 - ✅ OpenCode
 - ✅ Claude Code CLI
 
-## 🔗 링크
+## 🐛 Known Issues
+
+### OpenClaw File Descriptor Leak (#11181)
+
+**Problem**: OpenClaw watches skill folders recursively, opening file descriptors for every file. Python virtual environments contain thousands of files, potentially hitting system limits (default macOS: 256).
+
+**Solution**: Install venv OUTSIDE skills folder:
+- ✅ Correct: `~/.local/share/knowledge-search-venv/` (default in our installer)
+- ❌ Wrong: `~/.openclaw/skills/knowledge-search/venv/`
+
+**Symptoms if misconfigured**:
+- `OSError: [Errno 24] Too many open files`
+- OpenClaw becomes unresponsive
+- File operations fail
+
+**Manual fix** (if you installed incorrectly):
+```bash
+# Move venv outside skills folder
+mv ~/.openclaw/skills/knowledge-search/venv ~/.local/share/knowledge-search-venv
+
+# Update ks command wrapper
+sudo vi /opt/homebrew/bin/ks
+# Change: source ~/.local/share/knowledge-search-venv/bin/activate
+```
+
+**Status**: This is an OpenClaw bug, not a skill issue. Workaround is reliable.
+
+## 🔗 Links
 
 - GitHub: https://github.com/hohre12/knowledge-search-skill
 - Supabase: https://supabase.com

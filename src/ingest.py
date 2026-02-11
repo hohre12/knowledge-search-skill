@@ -30,22 +30,22 @@ class KnowledgeIngest:
             config["supabase"]["key"]
         )
         
-        # Embedding 설정
+        # Embedding configuration
         self.embedding_provider = config["embedding"]["provider"]
         self.embedding_model = config["embedding"]["model"]
         self.embedding_api_key = config["embedding"]["api_key"]
         
-        # Translation 설정
+        # Translation configuration
         self.translation_provider = config["translation"]["provider"]
         self.translation_model = config["translation"].get("model", "")
         self.translation_api_key = config["translation"].get("api_key", "")
         
-        # 청킹 설정
+        # Chunking configuration
         self.chunk_size = 512
         self.chunk_overlap = 128
         self.min_chunk_size = 100
         
-        # tiktoken 인코더
+        # tiktoken encoder
         self.encoding = tiktoken.get_encoding("cl100k_base")
     
     def translate_text(self, text: str) -> str:
@@ -151,7 +151,7 @@ class KnowledgeIngest:
         Returns:
             청크 리스트
         """
-        # 단어 수 확인
+        # Check word count
         word_count = len(text.split())
         
         # 짧은 문서는 전체 임베딩

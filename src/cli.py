@@ -11,7 +11,7 @@ import os
 import sys
 from pathlib import Path
 
-# src 모듈 import를 위한 경로 추가
+# Add path for src module imports
 sys.path.insert(0, str(Path(__file__).parent))
 
 from search import KnowledgeSearch
@@ -50,11 +50,11 @@ def search(query, limit, source, author, min_similarity, benchmark, format):
       ks search "meeting notes" --author John
     """
     try:
-        # KnowledgeSearch 초기화
+        # Initialize KnowledgeSearch
         config_path = Path(__file__).parent.parent / 'config.json'
         ks = KnowledgeSearch(str(config_path))
         
-        # 검색 실행
+        # Execute search
         start = time.time()
         results = ks.search(
             query, 
@@ -65,7 +65,7 @@ def search(query, limit, source, author, min_similarity, benchmark, format):
         )
         elapsed = time.time() - start
         
-        # JSON 출력 (AI용 - 전체 내용 포함)
+        # JSON output (for AI - includes full content)
         if format == 'json':
             import json
             output = {
@@ -77,7 +77,7 @@ def search(query, limit, source, author, min_similarity, benchmark, format):
             click.echo(json.dumps(output, ensure_ascii=False, indent=2))
             return
         
-        # 텍스트 출력 (사람용 - Preview만)
+        # Text output (for humans - preview only)
         if not results:
             click.echo("❌ No results found.")
             click.echo(f"\n💡 Tips:")
@@ -88,7 +88,7 @@ def search(query, limit, source, author, min_similarity, benchmark, format):
         click.echo(f"🔍 Search results for '{query}' ({len(results)} found):\n")
         
         for i, result in enumerate(results, 1):
-            # 유사도에 따른 이모지
+            # Emoji based on similarity score
             if result['similarity'] >= 80:
                 emoji = '🎯'
             elif result['similarity'] >= 60:
@@ -100,26 +100,26 @@ def search(query, limit, source, author, min_similarity, benchmark, format):
             click.echo(f"    Similarity: {result['similarity']}%")
             click.echo(f"    Author: {result['author']} | Source: {result['source']}")
             
-            # 텍스트 미리보기 (실제 내용만 표시)
+            # Text preview (show actual content only)
             text = result.get('text', '')
             if text:
                 import re
                 
-                # HTML 태그 제거
+                # Remove HTML tags
                 clean_text = re.sub(r'<[^>]+>', '\n', text)
                 
-                # 메타데이터 패턴 제거
+                # Remove metadata patterns
                 clean_text = re.sub(r'Category:.*?\n', '', clean_text)
                 clean_text = re.sub(r'Created:.*?\n', '', clean_text)
                 clean_text = re.sub(r'Modified:.*?\n', '', clean_text)
                 clean_text = re.sub(r'^#.*?\n', '', clean_text, flags=re.MULTILINE)
                 clean_text = re.sub(r'^---+\s*\n', '', clean_text, flags=re.MULTILINE)
                 
-                # 공백 정리
+                # Clean whitespace
                 clean_text = re.sub(r'\n\s*\n+', '\n', clean_text)
                 clean_text = clean_text.strip()
                 
-                # 첫 3개 항목 추출 (실제 내용)
+                # Extract first 5 items (actual content)
                 lines = [l.strip() for l in clean_text.split('\n') if l.strip()]
                 preview_items = lines[:5] if lines else []
                 
@@ -129,13 +129,13 @@ def search(query, limit, source, author, min_similarity, benchmark, format):
                         preview_text = preview_text[:150] + '...'
                     click.echo(f"    Preview: {preview_text}")
                 else:
-                    # 폴백: 원본 텍스트에서 300자 이후 150자
+                    # Fallback: 150 chars after position 300
                     fallback = text[300:450] if len(text) > 300 else text[:150]
                     click.echo(f"    Preview: {fallback}...")
             
             click.echo()
         
-        # 벤치마크 정보
+        # Benchmark info
         if benchmark:
             click.echo(f"⏱️  Search time: {elapsed*1000:.0f}ms")
             click.echo(f"📊 Average similarity: {sum(r['similarity'] for r in results) / len(results):.1f}%")
@@ -163,7 +163,7 @@ def status():
         config_path = Path(__file__).parent.parent / 'config.json'
         ks = KnowledgeSearch(str(config_path))
         
-        # 총 문서 수
+        # Get total document count
         result = ks.supabase.table("embeddings").select("*", count='exact').execute()
         total = result.count
         
@@ -171,7 +171,7 @@ def status():
         click.echo(f"Total documents: {total}")
         
         if total > 0:
-            # 소스별 통계
+            # Statistics by source
             sources = {}
             authors = {}
             for doc in result.data:
