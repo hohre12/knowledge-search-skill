@@ -6,43 +6,43 @@ REPO="hohre12/knowledge-search-skill"
 BRANCH="main"
 INSTALL_DIR="$HOME/.openclaw/skills/knowledge-search-skill"
 
-echo "📦 Knowledge Search Skill 설치 시작..."
+echo "📦 Knowledge Search Skill Installation..."
 echo ""
 
-# 1. 기존 설치 확인
+# 1. Check existing installation
 if [ -d "$INSTALL_DIR" ]; then
-    echo "⚠️  이미 설치되어 있습니다: $INSTALL_DIR"
-    read -p "삭제하고 재설치하시겠습니까? (y/N): " -n 1 -r
+    echo "⚠️  Already installed: $INSTALL_DIR"
+    read -p "Remove and reinstall? (y/N): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         rm -rf "$INSTALL_DIR"
-        echo "✅ 기존 설치 삭제 완료"
+        echo "✅ Removed existing installation"
     else
-        echo "❌ 설치 취소"
+        echo "❌ Installation cancelled"
         exit 1
     fi
 fi
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔑 Supabase 설정"
+echo "🔑 Supabase Configuration"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "💡 같은 Supabase 정보 입력 = 같은 지식 베이스 공유"
+echo "💡 Same Supabase = Shared knowledge base"
 echo ""
 
-read -p "Supabase URL (예: https://xxx.supabase.co): " SUPABASE_URL
+read -p "Supabase URL (e.g., https://xxx.supabase.co): " SUPABASE_URL
 read -p "Supabase Key (anon key): " SUPABASE_KEY
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🤖 임베딩 모델 선택"
+echo "🤖 Embedding Model Selection"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "  1) OpenAI text-embedding-3-small (권장, \$0.002/1M tokens)"
+echo "  1) OpenAI text-embedding-3-small (Recommended, \$0.002/1M tokens)"
 echo "  2) OpenAI text-embedding-3-large (\$0.013/1M tokens)"
-echo "  3) Cohere embed-multilingual-v3.0 (다국어)"
+echo "  3) Cohere embed-multilingual-v3.0 (Multilingual)"
 echo ""
-read -p "선택 (1-3): " -n 1 -r EMBEDDING_CHOICE
+read -p "Select (1-3): " -n 1 -r EMBEDDING_CHOICE
 echo ""
 echo ""
 
@@ -63,21 +63,21 @@ case $EMBEDDING_CHOICE in
         read -p "Cohere API Key: " EMBEDDING_API_KEY
         ;;
     *)
-        echo "❌ 잘못된 선택"
+        echo "❌ Invalid selection"
         exit 1
         ;;
 esac
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🌍 번역 모델 선택 (한국어 문서용)"
+echo "🌍 Translation Model Selection"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "  1) Claude Sonnet 4.5 (권장, 최고 품질)"
+echo "  1) Claude Sonnet 4.5 (Recommended, Best quality)"
 echo "  2) GPT-4o (OpenAI)"
-echo "  3) 번역 안 함 (영어 문서만 사용)"
+echo "  3) No translation (English documents only)"
 echo ""
-read -p "선택 (1-3): " -n 1 -r TRANSLATION_CHOICE
+read -p "Select (1-3): " -n 1 -r TRANSLATION_CHOICE
 echo ""
 echo ""
 
@@ -98,21 +98,21 @@ case $TRANSLATION_CHOICE in
         TRANSLATION_API_KEY=""
         ;;
     *)
-        echo "❌ 잘못된 선택"
+        echo "❌ Invalid selection"
         exit 1
         ;;
 esac
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📥 파일 다운로드 중..."
+echo "📥 Downloading files..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# 임시 디렉토리 생성
+# Create temp directory
 TEMP_DIR=$(mktemp -d)
 cd "$TEMP_DIR"
 
-# 다운로드할 파일 목록
+# List of files to download
 FILES=(
     "SKILL.md"
     "README.md"
@@ -125,7 +125,7 @@ FILES=(
     "src/ingest.py"
 )
 
-# GitHub raw URL에서 파일 다운로드
+# Download files from GitHub
 BASE_URL="https://raw.githubusercontent.com/$REPO/$BRANCH"
 
 mkdir -p src
@@ -136,28 +136,28 @@ done
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🐍 Python 환경 설정 중..."
+echo "🐍 Setting up Python environment..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# 설치 디렉토리로 이동
+# Move to install directory
 mkdir -p "$(dirname "$INSTALL_DIR")"
 mv "$TEMP_DIR" "$INSTALL_DIR"
 cd "$INSTALL_DIR"
 
-# Python 가상환경 생성
+# Create Python virtual environment
 python3 -m venv venv
 
-# 의존성 설치
+# Install dependencies
 source venv/bin/activate
 pip install -q --upgrade pip
 pip install -q -r requirements.txt
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "⚙️  설정 파일 생성 중..."
+echo "⚙️  Creating config file..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# config.json 생성
+# Create config.json
 cat > config.json << EOF
 {
   "supabase": {
@@ -187,14 +187,14 @@ cat > config.json << EOF
 }
 EOF
 
-echo "✅ config.json 생성 완료"
+echo "✅ config.json created"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔧 CLI 명령어 등록 중..."
+echo "🔧 Registering CLI command..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# ks CLI 등록
+# Register ks CLI
 KS_BIN="/opt/homebrew/bin/ks"
 if [ ! -f "$KS_BIN" ]; then
     cat > "$KS_BIN" << 'EOFCLI'
@@ -204,24 +204,23 @@ source venv/bin/activate
 python src/cli.py "$@"
 EOFCLI
     chmod +x "$KS_BIN"
-    echo "✅ ks 명령어 등록 완료"
+    echo "✅ ks command registered"
 else
-    echo "⚠️  ks 명령어 이미 존재"
+    echo "⚠️  ks command already exists"
 fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🎉 설치 완료!"
+echo "🎉 Installation Complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "📁 설치 위치: $INSTALL_DIR"
+echo "📁 Install location: $INSTALL_DIR"
 echo ""
-echo "✨ 이제 OpenClaw/OpenCode/Claude Code CLI에서"
-echo "   자연스럽게 대화하세요. 에이전트가 자동으로"
-echo "   지식 베이스를 검색합니다."
+echo "✨ Start using in OpenClaw/OpenCode/Claude Code CLI"
+echo "   The agent will automatically search your knowledge base."
 echo ""
-echo "💡 추가 작업 (선택):"
-echo "   - 나만의 문서 인덱싱: ks ingest <folder>"
-echo "   - 검색 테스트: ks search \"쿼리\""
-echo "   - 상태 확인: ks status"
+echo "💡 Additional options:"
+echo "   - Index your documents: ks ingest <folder>"
+echo "   - Test search: ks search \"query\""
+echo "   - Check status: ks status"
 echo ""
