@@ -105,7 +105,7 @@ echo ""
 
 # Primary install directory (full installation)
 if [ $INSTALL_OPENCLAW -eq 1 ]; then
-    PRIMARY_DIR="$HOME/.openclaw/skills/knowledge-search-skill"
+    PRIMARY_DIR="$HOME/.openclaw/skills/knowledge-search"
 elif [ $INSTALL_OPENCODE -eq 1 ]; then
     PRIMARY_DIR="$HOME/.config/opencode/skills/knowledge-search"
 else
@@ -459,8 +459,8 @@ echo "🔗 Creating symlinks for other targets..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Create symlinks for other selected targets
-if [ $INSTALL_OPENCLAW -eq 1 ] && [ "$PRIMARY_DIR" != "$HOME/.openclaw/skills/knowledge-search-skill" ]; then
-    OPENCLAW_DIR="$HOME/.openclaw/skills/knowledge-search-skill"
+if [ $INSTALL_OPENCLAW -eq 1 ] && [ "$PRIMARY_DIR" != "$HOME/.openclaw/skills/knowledge-search" ]; then
+    OPENCLAW_DIR="$HOME/.openclaw/skills/knowledge-search"
     if [ ! -e "$OPENCLAW_DIR" ]; then
         mkdir -p "$(dirname "$OPENCLAW_DIR")"
         ln -s "$PRIMARY_DIR" "$OPENCLAW_DIR"

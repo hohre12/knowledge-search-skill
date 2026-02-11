@@ -1,13 +1,46 @@
 ---
 name: knowledge-search
-description: Search and retrieve information from your knowledge base using natural language queries. Use when agents need to recall past work, decisions, project details, or any information stored in documents. Supports filtering by source and author. Fast semantic search powered by vector embeddings.
+description: Search and retrieve information from your knowledge base using natural language queries. Use this skill automatically when users ask about past work, decisions, project details, meeting notes, or any previously documented information. Supports filtering by source and author. Fast semantic search powered by vector embeddings.
 license: MIT
 compatibility: openclaw, opencode, claude-code
+metadata: {"openclaw": {"requires": {"bins": ["ks"]}, "emoji": "🔍", "homepage": "https://github.com/hohre12/knowledge-search-skill"}}
 ---
 
 # Knowledge Search
 
 Search your knowledge base using natural language queries. Works with Obsidian vaults, notes, and documents.
+
+## Automatic Usage
+
+**This skill is invoked automatically** when the user asks about:
+
+- **Past work or projects**: "What did we work on last month?"
+- **Decisions and reasoning**: "Why did we choose this approach?"
+- **Project documentation**: "Show me the API documentation"
+- **Meeting notes**: "What was discussed in the planning meeting?"
+- **Task status**: "What's the current status of the project?"
+- **Historical context**: "When did we start this feature?"
+- **Team notes**: "What did John write about deployment?"
+
+**Detection patterns** (user doesn't need to mention "search" or "knowledge"):
+- Questions about past ("What did...", "When did...", "Why did...")
+- Requests for context ("Show me...", "Find...", "Tell me about...")
+- Status inquiries ("What's the current...", "Where are we with...")
+- Document references ("Where is...", "What's in...")
+
+**When NOT to use**:
+- Creating new notes (use other tools)
+- Real-time information (use web search)
+- Code execution (use exec)
+
+## How It Works
+
+1. User asks about past work or documents
+2. You automatically run `ks search "<query>"` (no need to ask permission)
+3. Present results naturally as if you remembered them
+4. Combine with memory_search for recent context (memory/ files = last few days, knowledge-search = all documents)
+
+**Important**: Never announce "I'm using knowledge-search skill". Just use it silently and present results.
 
 ## Quick Start
 
