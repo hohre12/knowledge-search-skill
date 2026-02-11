@@ -236,7 +236,11 @@ async function main() {
     
     // Register ks command
     p.log.step('Registering ks command...');
-    const ksWrapper = `#!/bin/bash\nsource ${venvDir}/bin/activate\npython -m src.cli "$@"\n`;
+    const ksWrapper = `#!/bin/bash
+cd ${primaryDir}
+source ${venvDir}/bin/activate
+python -m src.cli "$@"
+`;
     writeFileSync('/opt/homebrew/bin/ks', ksWrapper);
     execSync('chmod +x /opt/homebrew/bin/ks');
     p.log.success('✓ ks command registered at /opt/homebrew/bin/ks');
