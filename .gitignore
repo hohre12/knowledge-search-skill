@@ -8,6 +8,7 @@ config.json
 # Internal docs
 ROADMAP.md
 IMPROVEMENTS.md
+TEST_CASES.md
 
 # Archive (internal tools/scripts)
 archive/
