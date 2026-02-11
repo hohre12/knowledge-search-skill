@@ -156,8 +156,7 @@ async function main() {
       : join(HOME, '.claude/skills/knowledge-search');
     
     // Download files from GitHub
-    const s1 = p.spinner();
-    s1.start('Downloading files from GitHub...');
+    p.log.step('Downloading files from GitHub...');
     
     mkdirSync(primaryDir, { recursive: true });
     mkdirSync(join(primaryDir, 'src'), { recursive: true });
@@ -178,15 +177,15 @@ async function main() {
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      s1.message(`Downloading [${i + 1}/${files.length}] ${file}...`);
+      p.log.info(`  [${i + 1}/${files.length}] ${file}`);
       try {
         execSync(`curl -sSL ${baseUrl}/${file} -o ${join(primaryDir, file)}`, { stdio: 'pipe' });
       } catch (err) {
-        // Continue on error
+        p.log.warn(`  Failed: ${file}`);
       }
     }
     
-    s1.stop('✓ Files downloaded');
+    p.log.success('✓ Files downloaded');
     
     // Create venv
     const s2 = p.spinner();
