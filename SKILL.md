@@ -1,6 +1,6 @@
 ---
 name: knowledge-search
-description: "MANDATORY FIRST STEP: Before answering ANY personal/past question, work history, project inquiry, or document search, ALWAYS run `ks search \"<query>\"` first. This searches 454 indexed documents. Triggers on: personal questions (내가/I + past tense), project names, document requests, past decisions. Use silently - never announce you're using it."
+description: "MANDATORY FIRST STEP: Before answering ANY personal/past question, work history, project inquiry, or document search, ALWAYS run `ks search \"<query>\"` first. This searches 454 indexed documents in Vector DB (original files may not exist). Use ONLY the Preview from search results - never try to read file paths. Triggers on: personal questions (내가/I + past tense), project names, document requests. Use silently."
 license: MIT
 compatibility: openclaw, opencode, claude-code
 metadata: {"openclaw": {"emoji": "🔍", "requires": {"bins": ["python3", "ks"]}}}
@@ -48,16 +48,22 @@ Search your knowledge base using natural language queries. Works with Obsidian v
 2. **Use the Preview from search results** (contains sufficient content)
 3. Answer naturally based on Preview (never say "I searched...")
 
-**CRITICAL - Do NOT do this:**
+**CRITICAL - Architecture:**
+- **Knowledge Search = Vector DB ONLY** (original files may not exist)
+- **Preview = The actual indexed content** (complete, not a snippet)
+- **Original files = Optional** (may be deleted after indexing)
+
+**Do NOT do this:**
 ❌ Never try to `read` the file path from search results
-❌ Never use `grep` to find the file
+❌ Never use `grep` or file system search
 ❌ Never say "file not found" or "path doesn't exist"
+❌ Never attempt to access original documents
 
 **Why?**
-- Search results are from vector DB (snapshot)
-- Files may have moved/renamed since indexing
-- **Preview contains the actual content** - that's enough!
-- If more detail needed, ask the user to re-index
+- **Vector DB is the source of truth** - not the file system
+- Original files are deliberately deleted after embedding (save space/security)
+- **Preview contains everything** - it's the indexed content, not a summary
+- File paths are metadata only (for reference)
 
 **When NOT to use:**
 - Creating new content
@@ -68,14 +74,15 @@ Search your knowledge base using natural language queries. Works with Obsidian v
 
 1. User asks about past work or documents
 2. You automatically run `ks search "<query>"` (no need to ask permission)
-3. **Use the Preview text from results** - it contains the actual indexed content
+3. **Use ONLY the Preview text from results** - this IS the indexed content (complete, not a summary)
 4. Present results naturally as if you remembered them
 5. Combine with memory_search for recent context (memory/ files = last few days, knowledge-search = all documents)
 
 **Important**: 
-- Never announce "I'm using knowledge-search skill". Just use it silently and present results.
-- **The Preview IS the content** - don't try to read the file path separately
-- If Preview isn't enough, tell user and ask if they want to re-index
+- Never announce "I'm using knowledge-search skill". Just use it silently
+- **Preview = Indexed content from Vector DB** (the only source - original files don't exist)
+- File paths are metadata only (author/source info) - not for reading
+- If Preview isn't enough, the document wasn't indexed properly - tell user
 
 ## Example Usage
 
@@ -140,6 +147,8 @@ Use knowledge-search when you need to:
 - **Find project details**: "Show me project documentation"
 - **Get context**: "What's the current status?"
 - **Research decisions**: "Why did we choose this approach?"
+
+**Remember**: All content is in Vector DB. Preview is complete indexed content. Original files don't exist.
 - **Find notes**: "Where did I write about X?"
 
 ## Commands
