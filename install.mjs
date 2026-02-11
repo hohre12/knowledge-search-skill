@@ -157,8 +157,6 @@ async function main() {
       : join(HOME, '.claude/skills/knowledge-search');
     
     // Download files from GitHub
-    s.message('Downloading files...');
-    
     mkdirSync(primaryDir, { recursive: true });
     mkdirSync(join(primaryDir, 'src'), { recursive: true });
     
@@ -176,7 +174,9 @@ async function main() {
     
     const baseUrl = 'https://raw.githubusercontent.com/hohre12/knowledge-search-skill/main';
     
-    for (const file of files) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      s.message(`Downloading files... (${i + 1}/${files.length}) ${file}`);
       try {
         execSync(`curl -sSL ${baseUrl}/${file} -o ${join(primaryDir, file)}`, { stdio: 'ignore' });
       } catch (err) {
@@ -185,18 +185,20 @@ async function main() {
     }
     
     // Create venv
-    s.message('Creating Python virtual environment...');
+    s.message('Creating Python virtual environment... (this may take 10-20 seconds)');
     const venvDir = join(HOME, '.local/share/knowledge-search-venv');
     mkdirSync(join(HOME, '.local/share'), { recursive: true });
     execSync(`python3 -m venv ${venvDir}`, { stdio: 'ignore' });
     
     // Install dependencies
-    s.message('Installing Python dependencies...');
+    s.message('Upgrading pip...');
     execSync(`${venvDir}/bin/pip install --quiet --upgrade pip`, { stdio: 'ignore' });
+    
+    s.message('Installing Python dependencies... (openai, supabase, tiktoken, anthropic)');
     execSync(`${venvDir}/bin/pip install --quiet -r ${primaryDir}/requirements.txt`, { stdio: 'ignore' });
     
     // Create config.json
-    s.message('Configuring...');
+    s.message('Writing configuration (config.json)...');
     const config = {
       supabase: {
         url: supabaseUrl,
@@ -229,12 +231,14 @@ async function main() {
     
     // Create symlinks
     if (targets.includes('opencode') && primaryDir !== join(HOME, '.config/opencode/skills/knowledge-search')) {
+      s.message('Creating OpenCode symlink...');
       const opencodeDir = join(HOME, '.config/opencode/skills/knowledge-search');
       mkdirSync(join(HOME, '.config/opencode/skills'), { recursive: true });
       execSync(`ln -s ${primaryDir} ${opencodeDir}`);
     }
     
     if (targets.includes('claude') && primaryDir !== join(HOME, '.claude/skills/knowledge-search')) {
+      s.message('Creating Claude CLI symlink...');
       const claudeDir = join(HOME, '.claude/skills/knowledge-search');
       mkdirSync(join(HOME, '.claude/skills'), { recursive: true });
       execSync(`ln -s ${primaryDir} ${claudeDir}`);
