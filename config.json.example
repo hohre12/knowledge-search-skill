@@ -1,0 +1,26 @@
+{
+  "supabase": {
+    "url": "https://YOUR_PROJECT.supabase.co",
+    "key": "YOUR_SUPABASE_ANON_KEY"
+  },
+  "embedding": {
+    "provider": "openai",
+    "model": "text-embedding-3-small",
+    "api_key": "sk-proj-YOUR_KEY"
+  },
+  "translation": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-5-20250929",
+    "api_key": "sk-ant-YOUR_KEY"
+  },
+  "search": {
+    "default_limit": 5,
+    "min_similarity": 35.0
+  },
+  "sources": {
+    "obsidian": {
+      "path": "~/Documents/ObsidianVault",
+      "enabled": false
+    }
+  }
+}
