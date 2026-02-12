@@ -16,7 +16,6 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from search import KnowledgeSearch
 from ingest import KnowledgeIngest
-from db_setup import DatabaseSetup
 
 
 @click.group()
@@ -236,6 +235,9 @@ def setup_db():
     Provides instructions for manual setup if needed.
     """
     try:
+        # Lazy import to avoid module loading issues
+        from db_setup import DatabaseSetup
+        
         config_path = Path(__file__).parent.parent / 'config.json'
         setup = DatabaseSetup(str(config_path))
         
