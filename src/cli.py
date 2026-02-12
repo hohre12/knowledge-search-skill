@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from search import KnowledgeSearch
 from ingest import KnowledgeIngest
+from db_setup import DatabaseSetup
 
 
 @click.group()
@@ -223,6 +224,35 @@ def ingest(folder, source, author):
         click.echo(f"❌ Error: {e}")
         import traceback
         traceback.print_exc()
+        sys.exit(1)
+
+
+@cli.command()
+def setup_db():
+    """
+    Verify and guide database setup
+    
+    Checks if Supabase database is properly configured.
+    Provides instructions for manual setup if needed.
+    """
+    try:
+        config_path = Path(__file__).parent.parent / 'config.json'
+        setup = DatabaseSetup(str(config_path))
+        
+        success = setup.setup()
+        
+        if not success:
+            sys.exit(1)
+    
+    except FileNotFoundError:
+        click.echo("❌ config.json not found.")
+        click.echo("   Check your installation directory")
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"❌ Error: {e}")
+        if '--debug' in sys.argv:
+            import traceback
+            traceback.print_exc()
         sys.exit(1)
 
 

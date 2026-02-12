@@ -206,7 +206,21 @@ class KnowledgeIngest:
         Returns:
             ISO 8601 형식의 날짜 문자열 또는 None
         """
-        # Apple Notes 형식: "Created: 2016년 2월 26일 금요일 오전 2:42:56"
+        # Format 1: ISO date format "Created: YYYY-MM-DD"
+        simple_pattern = r'Created:\s*(\d{4})-(\d{2})-(\d{2})'
+        simple_match = re.search(simple_pattern, content)
+        
+        if simple_match:
+            try:
+                year = int(simple_match.group(1))
+                month = int(simple_match.group(2))
+                day = int(simple_match.group(3))
+                dt = datetime(year, month, day, 0, 0, 0)
+                return dt.isoformat()
+            except:
+                pass
+        
+        # Format 2: Apple Notes 형식 "Created: 2016년 2월 26일 금요일 오전 2:42:56"
         pattern = r'Created:\s*(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일.*?(\d{1,2}):(\d{2}):(\d{2})'
         match = re.search(pattern, content)
         

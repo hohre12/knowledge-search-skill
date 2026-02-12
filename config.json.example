@@ -14,7 +14,7 @@
     "api_key": "sk-ant-YOUR_KEY"
   },
   "search": {
-    "default_limit": 5,
+    "default_limit": 10,
     "min_similarity": 35.0
   },
   "sources": {

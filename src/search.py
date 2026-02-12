@@ -139,6 +139,23 @@ class KnowledgeSearch:
         else:
             raise ValueError(f"Unknown embedding provider: {self.embedding_provider}")
     
+    def detect_temporal_intent(self, query: str) -> bool:
+        """
+        Detect if query asks about current/recent state
+        
+        Args:
+            query: Search query
+            
+        Returns:
+            True if query contains temporal keywords
+        """
+        temporal_keywords = [
+            '지금', '현재', '최근', '최신', '오늘',
+            'now', 'current', 'latest', 'recent', 'today'
+        ]
+        query_lower = query.lower()
+        return any(keyword in query_lower for keyword in temporal_keywords)
+    
     def search(
         self,
         query: str,
@@ -180,7 +197,7 @@ class KnowledgeSearch:
         results = self.supabase.rpc('search_embeddings', {
             'query_embedding': query_embedding,
             'match_threshold': min_similarity / 100.0,
-            'match_count': limit * 3
+            'match_count': limit * 5
         }).execute()
         
         # Filter and format
@@ -217,8 +234,36 @@ class KnowledgeSearch:
                 'date': metadata.get('date', '')
             })
         
-        # Sort by similarity
-        filtered.sort(key=lambda x: x['similarity'], reverse=True)
+        # Sort by similarity, with date consideration for temporal queries
+        is_temporal = self.detect_temporal_intent(query)
+        
+        if is_temporal and filtered:
+            # For temporal queries: weighted scoring (70% similarity + 30% recency)
+            from datetime import datetime
+            
+            for result in filtered:
+                date_str = result.get('date', '')
+                
+                if date_str:
+                    try:
+                        doc_date = datetime.fromisoformat(date_str[:10])
+                        days_ago = (datetime.now() - doc_date).days
+                        # Recency score: 100 at 0 days, decreases gradually
+                        recency_score = max(0, 100 - (days_ago / 10))
+                    except:
+                        recency_score = 0
+                else:
+                    recency_score = 0
+                
+                # Weighted final score: 60% similarity + 40% recency
+                result['final_score'] = result['similarity'] * 0.6 + recency_score * 0.4
+            
+            # Sort by final score
+            filtered.sort(key=lambda x: x.get('final_score', x['similarity']), reverse=True)
+        else:
+            # Default: sort by similarity only
+            filtered.sort(key=lambda x: x['similarity'], reverse=True)
+        
         return filtered[:limit]
     
     def format_results(self, results: List[Dict]) -> str:
